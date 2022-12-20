@@ -1,7 +1,6 @@
 import { O_model } from "./O_model.module.js"
 import { 
-    O_model_property, 
-    O_model_property_validation, 
+    O_model_property,
     O_model_property_key
 } from "./O_model_property.module.js"
 
@@ -72,25 +71,10 @@ var o_model_property__s_modified_ts_lt = new O_model_property(
     null
 );
 
-var o_model__o_hand = new O_model(
-    "O_hand",
+var o_model__O_user = new O_model(
+    "O_user",
     [
         f_o__cloned(o_model_property__n_id_default_id),
-        new O_model_property(
-            "s_side", 
-            "string",
-        ),
-        f_o__cloned(o_model_property__s_created_ts_lt),
-        f_o__cloned(o_model_property__s_modified_ts_lt),
-    ]
-);
-a_o_model.push(o_model__o_hand);
-
-var o_model__o_finger = new O_model(
-    "O_finger",
-    [
-        f_o__cloned(o_model_property__n_id_default_id), // n_id
-        f_o_model_property__foreign_key(o_model__o_hand), // n_o_hand_n_id
         new O_model_property(
             "s_name", 
             "string",
@@ -99,7 +83,51 @@ var o_model__o_finger = new O_model(
         f_o__cloned(o_model_property__s_modified_ts_lt),
     ]
 );
-a_o_model.push(o_model__o_finger);
+a_o_model.push(o_model__O_user);
+
+var o_model__O_chatroom = new O_model(
+    "O_chatroom",
+    [
+        f_o__cloned(o_model_property__n_id_default_id),
+        new O_model_property(
+            "s_name", 
+            "string",
+        ),
+        f_o__cloned(o_model_property__s_created_ts_lt),
+        f_o__cloned(o_model_property__s_modified_ts_lt),
+    ]
+);
+a_o_model.push(o_model__O_chatroom);
+var o_model__O_message = new O_model(
+    "O_message",
+    [
+        f_o__cloned(o_model_property__n_id_default_id),
+        new O_model_property(
+            "s_markdown", 
+            "string",
+        ),
+        f_o__cloned(o_model_property__s_created_ts_lt),
+        f_o__cloned(o_model_property__s_modified_ts_lt),
+    ]
+);
+a_o_model.push(o_model__O_message);
+
+
+var o_model__O_user_o_message_o_chatroom = new O_model(
+    "O_user_o_message_o_chatroom",
+    [
+        f_o__cloned(o_model_property__n_id_default_id), // n_id
+        f_o_model_property__foreign_key(o_model__O_user), // n_o_user_n_id
+        f_o_model_property__foreign_key(o_model__O_message), // n_o_message_n_id
+        f_o_model_property__foreign_key(o_model__O_chatroom), // n_o_chatroom_n_id
+        f_o__cloned(o_model_property__s_created_ts_lt),
+        f_o__cloned(o_model_property__s_modified_ts_lt),
+    ]
+);
+a_o_model.push(o_model__O_user_o_message_o_chatroom);
+
+
+
 
 export {a_o_model}
 

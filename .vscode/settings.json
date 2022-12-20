@@ -1,0 +1,7 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#a91313",
+    },
+    "editor.renderWhitespace": "all", 
+    "javascript.inlayHints.parameterNames.enabled": "all",
+}

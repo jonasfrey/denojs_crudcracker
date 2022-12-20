@@ -1,6 +1,2 @@
-./gitignored/
-/gitignored/
-./gitignored
-/gitignored
-gitignored
-gitignored/
+*.gitignored.*
+!*.gitignored.*.example

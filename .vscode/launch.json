@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+
+        {
+            "name": "Listen for Xdebug (php 5.6, xdebug2 port 9000)",
+            "type": "php",
+            "request": "launch",
+            "port": 9003
+        },
+
+        {
+            "name": "Listen for XDebug (php 7 / xdebug 3 port 9003) ",
+            "type": "php",
+            "request": "launch",
+            // "port": 9003,// xdebug >=3
+            "port": 9003, // xdebug 2
+            "pathMappings": {
+                "/var/www/html/sgportal": "${workspaceFolder}"
+            },
+            "xdebugSettings": {
+                "max_data": 65535,
+                "show_hidden": 1,
+                "max_children": 100,
+                "max_depth": 5
+            }
+        }
+    ],
+    "keyboard.dispatch": "keyCodes",
+
+}

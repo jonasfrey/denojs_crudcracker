@@ -1,4 +1,4 @@
-import { O_person } from "../models/javascript_classes/classes_with_all_properties/O_person.module.js";
+import { O_person } from "../models/javascript_classes/./O_person.module.js";
 import {a_o_test_data} from "./a_o_test_data.module.js"
 import { O_file_info } from "./O_file_info.module.js";
 import { O_media } from "./O_media.module.js";

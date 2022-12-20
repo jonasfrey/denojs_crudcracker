@@ -1,4 +1,4 @@
-import {O_person} from "./javascript_classes/classes_with_all_properties/a_o_class.module.js";
+import {O_person} from "./javascript_classes/./a_o_class.module.js";
 
 import {f_a_o_validation_error} from "./f_a_o_validation_error.module.js"
 

@@ -7,12 +7,9 @@ import { f_write_file } from "./f_write_file.module.js"
 
 var f_create_database_tables = function(){
 
-
     for(let o_model of a_o_model){
         f_create_database_table(o_model)
     }
-
-
 }
 
 export {f_create_database_tables}

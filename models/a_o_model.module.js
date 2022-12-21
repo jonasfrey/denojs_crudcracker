@@ -20,7 +20,6 @@ var o_model_property__n_id_default_id = new O_model_property(
     "n_id", 
     "integer",
     false, 
-    false, 
     null, 
     null, 
     null,
@@ -32,7 +31,6 @@ var f_o_model_property__foreign_key = function(o_model){
     return new O_model_property(
         `n_${o_model.s_name}_n_id`,
         "integer",
-        false,
         false, 
         null, 
         null, 
@@ -52,7 +50,6 @@ var o_model_property__s_created_ts_lt = new O_model_property(
     "s_created_ts_lt", 
     "string",
     false, 
-    false, 
     null, 
     null, 
     null,
@@ -62,7 +59,6 @@ var o_model_property__s_created_ts_lt = new O_model_property(
 var o_model_property__s_modified_ts_lt = new O_model_property(
     "s_created_ts_lt", 
     "string",
-    false, 
     false, 
     null, 
     null, 

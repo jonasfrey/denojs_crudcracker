@@ -149,7 +149,11 @@ f_a_o_validation_error__o_model_property_datacontent = function(
         )
         return;
     }
-    if(o_model_property.s_type == "number"){
+    if(
+        o_model_property.s_type == "integer"
+        ||
+        o_model_property.s_type == "float"
+    ){
         if(o_model_property.n_minimum_number != null){
             if(property_value < o_model_property.n_minimum_number){
                 a_o_validation_error__o_model_property_datacontent.push(new O_validation_error__o_model_property(
@@ -172,22 +176,24 @@ f_a_o_validation_error__o_model_property_datacontent = function(
         }
     }
     if(o_model_property.s_type == "string"){
+        const o_text_encoder = new TextEncoder();
+        const s_value_encoded = o_text_encoder.encode(property_value.length);
         var n_truncated_length = 10;
         var s_property_value_truncated = property_value.substring(0, Math.min(property_value.length, n_truncated_length))+(".".repeat((property_value.length>3) * 3))
-        if(o_model_property.n_minimum_string_length != null){
-            if(property_value.length < o_model_property.n_minimum_string_length){
+        if(o_model_property.n_minimum_string_length_in_bytes != null){
+            if(s_value_encoded.length < o_model_property.n_minimum_string_length_in_bytes){
                 a_o_validation_error__o_model_property_datacontent.push(new O_validation_error__o_model_property(
-                    `'${o_model_property.s_name}:(${property_value})': stringlength (${s_property_value_truncated}) is smaller than allowed minimum length (${o_model_property.n_minimum_string_length})`,
+                    `'${o_model_property.s_name}:(${property_value})': stringlength (${s_property_value_truncated}) is smaller than allowed minimum ascii length (${o_model_property.n_minimum_string_length_in_bytes})`,
                     o_model_property.s_name, 
                     o_model_property, 
                     property_value
                 ))
             }
         }
-        if(o_model_property.n_maximum_string_length != null){
-            if(property_value.length < o_model_property.n_maximum_string_length){
+        if(o_model_property.n_maximum_string_length_in_bytes != null){
+            if(s_value_encoded.length < o_model_property.n_maximum_string_length_in_bytes){
                 a_o_validation_error__o_model_property_datacontent.push(new O_validation_error__o_model_property(
-                    `'${o_model_property.s_name}:(${property_value})': stringlength (${s_property_value_truncated}) is bigger than allowed minimum length (${o_model_property.n_maximum_string_length})`,
+                    `'${o_model_property.s_name}:(${property_value})': stringlength (${s_property_value_truncated}) is bigger than allowed maximum ascii length (${o_model_property.n_maximum_string_length_in_bytes})`,
                     o_model_property.s_name, 
                     o_model_property, 
                     property_value

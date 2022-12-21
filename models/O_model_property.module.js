@@ -13,7 +13,6 @@ class O_model_property{
     constructor(
         s_name,
         s_type,
-        b_signed = true, 
         b_private = false,
         o_model_property_validation = null,
         default_value = null, 
@@ -23,14 +22,15 @@ class O_model_property{
     ){
         this.s_name = s_name
         this.s_type = s_type
-        this.b_signed = b_signed
         this.b_private = b_private
         this.o_model_property_validation = o_model_property_validation
         this.default_value = default_value
         this.b_required = b_required
         this.b_unique = b_unique
         this.o_model_property_key = o_model_property_key
-        
+    }
+    f_b_signed(){
+        return (this?.o_model_property_validation?.n_minimum_number < 0);
     }
 
 }
@@ -38,14 +38,14 @@ class O_model_property_validation{
     constructor(
         n_minimum_number = null, 
         n_maximum_number = null, 
-        n_minimum_string_length = null, 
-        n_maximum_string_length = null, 
+        n_minimum_string_length_in_bytes = null, 
+        n_maximum_string_length_in_bytes = null, 
         s_regex = null,
     ){
         this.n_minimum_number = n_minimum_number
         this.n_maximum_number = n_maximum_number
-        this.n_minimum_string_length = n_minimum_string_length
-        this.n_maximum_string_length = n_maximum_string_length
+        this.n_minimum_string_length_in_bytes = n_minimum_string_length_in_bytes
+        this.n_maximum_string_length_in_bytes = n_maximum_string_length_in_bytes
         this.s_regex = s_regex
     }
 }

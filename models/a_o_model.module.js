@@ -27,9 +27,13 @@ var o_model_property__n_id_default_id = new O_model_property(
     o_model_property_key__default_primary
 );
 
+var f_s_foreign_key_name_from_o_model = function(o_model){
+    return `n_${o_model.s_name.toLowerCase()}_n_id`;
+}
 var f_o_model_property__foreign_key = function(o_model){
+
     return new O_model_property(
-        `n_${o_model.s_name}_n_id`,
+        f_s_foreign_key_name_from_o_model(o_model),
         "integer",
         false, 
         null, 
@@ -121,8 +125,6 @@ var o_model__O_user_o_message_o_chatroom = new O_model(
     ]
 );
 a_o_model.push(o_model__O_user_o_message_o_chatroom);
-
-
 
 
 export {a_o_model}

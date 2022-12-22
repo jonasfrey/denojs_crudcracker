@@ -61,7 +61,7 @@ var o_model_property__s_created_ts_lt = new O_model_property(
     null
 );
 var o_model_property__s_modified_ts_lt = new O_model_property(
-    "s_created_ts_lt", 
+    "s_modified_ts_lt", 
     "string",
     false, 
     null, 

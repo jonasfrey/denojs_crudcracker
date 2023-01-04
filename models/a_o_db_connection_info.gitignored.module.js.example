@@ -1,0 +1,29 @@
+
+
+class O_connection_info{
+  constructor(
+    s_hostname, 
+    n_port, 
+    s_username, 
+    s_password, 
+  ){
+    this.s_hostname = s_hostname
+    this.n_port = n_port
+    this.s_username = s_username
+    this.s_password = s_password
+  }
+}
+
+var a_o_db_connection_info = [
+  new O_connection_info(
+     "127.0.0.1",
+     3306,
+     "admin",
+     "Test1234",
+  )
+]
+
+export {
+  a_o_db_connection_info, 
+  O_connection_info
+}

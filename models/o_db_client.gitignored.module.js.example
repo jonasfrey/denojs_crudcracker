@@ -1,8 +1,0 @@
-import { Client } from "https://deno.land/x/mysql/mod.ts";
-const o_db_client = await new Client().connect({
-  hostname: "127.0.0.1",
-  username: "admin",
-  password: "test1234",
-});
-
-export {o_db_client}

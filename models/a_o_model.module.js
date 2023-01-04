@@ -126,6 +126,14 @@ var o_model__O_user_o_message_o_chatroom = new O_model(
 );
 a_o_model.push(o_model__O_user_o_message_o_chatroom);
 
-
+// for(let o_model of a_o_model){
+//     var a_o_model__filtered = a_o_model.filter(o=>o.s_name == o_model.s_name);
+//     if(a_o_model__filtered.length > 1){
+//         var o_error = {
+//             s_msg: 'o_model.s_name must be unique, two models with same name have been found'
+//         }
+//         throw Error(JSON.stringify(o_error));
+//     }
+// }
 export {a_o_model}
 

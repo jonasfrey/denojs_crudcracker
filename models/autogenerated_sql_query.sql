@@ -1,5 +1,4 @@
--- {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_databases_and_tables.module.js","s_ts_created":"Thu Dec 29 2022 00:46:46 GMT+0100 (Central European Standard Time)","n_ts_created":1672271206182}
-
+-- {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_databases_and_tables.module.js","s_ts_created":"Mon Jan 02 2023 00:34:18 GMT+0100 (Central European Standard Time)","n_ts_created":1672616058363}
 USE test_database
 CREATE TABLE a_o_user (
     n_id BIGINT  AUTO_INCREMENT,

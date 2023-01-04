@@ -1,5 +1,5 @@
 
-//{"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Thu Dec 29 2022 00:46:45 GMT+0100 (Central European Standard Time)","n_ts_created":1672271205557}
+//{"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Mon Jan 02 2023 00:34:17 GMT+0100 (Central European Standard Time)","n_ts_created":1672616057632}
 import {O_user} from "./O_user.module.js"
 import {O_chatroom} from "./O_chatroom.module.js"
 import {O_message} from "./O_message.module.js"

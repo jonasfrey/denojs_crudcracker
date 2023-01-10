@@ -165,6 +165,9 @@ var f_s_query_drop_column = function(
 var f_s_query_modify_table = function(
     o_objectrelation_with_same_prop_val
 ){
+    // renaming table columns is not supported
+    // so we dont care about that
+
     var s_query = '';
     if(
         o_objectrelation_with_same_prop_val.o_1
@@ -174,17 +177,45 @@ var f_s_query_modify_table = function(
         var a_o_model_property = o_objectrelation_with_same_prop_val.o_1.a_o_model_property;
         var a_o_model_property__last = o_objectrelation_with_same_prop_val.o_2.a_o_model_property;
 
-        var a_o_objectrelation_with_same_prop_val = 
-        f_a_o_objectrelation_with_same_prop_val(
-            a_o_model_property, 
-            a_o_model_property__last, 
-            's_name', 
-        );
+        // propertys that have not been added or removed 
+        // but that may have changed position /index
+        var a_o_objects_related = []
+        for(var n_index_a_o_model_property in a_o_model_property){
+            var o_model_property = a_o_model_property[n_index_a_o_model_property];
+            var o_model_property__last = null;
+            var n_index_a_o_model_property__last = null;
+            for(var n in a_o_model_property__last){
+                var o = a_o_model_property__last[n];
+                if(o_model_property.s_name == o.s_name){
+                    o_model_property__last = o;
+                    n_index_a_o_model_property__last = n;
+                    break;
+                }
+            }
+
+            if(o_model_property__last){
+                a_o_objects_related.push(
+                    new O_with_index(
+                        n_index_a_o_model_property, 
+                        o_model_property
+                    ),
+                    new O_with_index(
+                        n_index_a_o_model_property, 
+                        o_model_property
+                    )
+                )
+            }
+        }
+        console.log(a_o_objects_related)
+        console.log("exit")
+        Deno.exit()
         var a_o_with_index_with_same_prop_val = []
-        for(var o_objectrelation_with_same_prop_val of a_o_objectrelation_with_same_prop_val){
+        for(var n_index in a_o_objectrelation_with_same_prop_val){
+            var o_model_property = a_o_objectrelation_with_same_prop_val[n_index];
             a_o_with_index_with_same_prop_val.push(
                 new O_with_index(
-
+                    n_index, 
+                    o_model_property
                 )
             )
         }
@@ -336,34 +367,102 @@ var f_a_o_model__last = async function(){
     return a_o_model__last;
 }
 
-
-class O_models_related{
+class O_objects_related{
     constructor(
-        o_model = null,
-        o_model__last = null, 
+        o = null,
+        o__last = null, 
     ){
-        this.o_model = o_model
-        this.o_model__last = o_model__last
+        this.o = o
+        this.o__last = o__last
     }
 }
 
-class O_model_propertys_related{
-    constructor(
-        o_model_property, 
-        o_model_property__last
-    ){
-        this.o_model_property = o_model_property, 
-        this.o_model_property__last = o_model_property__last
-    }
-}
+
 class O_with_index{
     constructor(
         n_index, 
+        a_o,
         o
     ){
         this.n_index = n_index, 
+        this.a_o = a_o
         this.o = o
     }
+}
+class O_objects_with_same_prop_val{
+    constructor(
+        s_property_name,
+        property_value,
+        a_o_with_index
+    ){
+        this.s_property_name = s_property_name ,
+        this.property_value = property_value ,
+        this.a_o_with_index = a_o_with_index 
+    }
+}
+
+var f_o_objects_with_same_prop_val = function(
+    a_a_o,
+    s_property_name
+){
+    var a_a_o_with_index = []
+    for(var a_o of a_a_o){
+        var a_o_with_index = [];
+        for(var n_index in a_o){
+            var o = a_o[n_index];
+            if(!o.hasOwnProperty(s_property_name)){continue}
+            a_o_with_index.push(
+                new O_with_index(
+                    n_index, 
+                    a_o, 
+                    o
+                )
+            )
+            for(var a_o2 of a_a_o){
+                if(a_o2 == a_o){continue}
+                a_o_with_index.concat(
+                    a_o_with_index = f_a_o_with_index__same_prop_val(
+                        s_property_name, 
+                        o[s_property_name], 
+                        a_o2
+                    )
+                )
+            }
+        }
+        a_a_o_with_index.push(a_o_with_index)
+    }
+}
+var f_a_o_with_index__same_prop_val = function(
+    s_property_name, 
+    property_value, 
+    a_o
+){
+    var a_o_with_index = [];
+    for(var n_index in a_o){
+        var o = a_o[n_index];
+        // if the object was not found
+        // we explicityly give the information 
+        // that it was not found by having 'null' as a value
+        // generally this should not be done but this is a lazy exception... 
+        var n_index__current = null;
+        var a_o__current = null;
+        var o__current = null;
+        if(o.hasOwnProperty(s_property_name)){
+            if(o[s_property_name] == property_value){
+                n_index__current = n_index
+                a_o__current = a_o
+                o__current = o
+            }
+        }
+        a_o_with_index.push(
+            new O_with_index(
+                n_index__current, 
+                a_o__current, 
+                o__current
+            )
+        )
+    }
+    return a_o_with_index
 }
 class O_objectrelation_with_same_prop_val{
     constructor(
@@ -383,6 +482,8 @@ var f_a_o_with_index__with_same_prop_val = function(
     a_o__2, 
     s_property_name
 ){
+    console.log(a_o__1)
+    console.log(a_o__2)
     var a_o_objectrelation_with_same_prop_val = []
     for(var o__1 of a_o__1){
         var a_o__2__filtered = a_o__2.filter(
@@ -417,7 +518,7 @@ var f_a_o___not_existing_in_a2 = function(
     return a_o
 }
 var f_autogenerate_databases_and_tables = async function(){
-    var a_o_model__last = await f_a_o_model__last;
+    var a_o_model__last = await f_a_o_model__last();
     var a_o_objectrelation_with_same_prop_val = 
         f_a_o_with_index__with_same_prop_val(
             a_o_model, 
@@ -442,7 +543,7 @@ var f_autogenerate_databases_and_tables = async function(){
 
     var s_path_folder_backups = "./.gitignored.db_backups";
 
-    console.log(`! this will override the backup files in ${s_path_folder_backups} drop the database and create it again !`)
+    console.log(`! this will override the backup files in ${s_path_folder_backups} drop db tables and create them again !`)
     var b_exit = prompt('continue?: [y/n]').toLowerCase() != 'y';
     if(b_exit){
         return;
@@ -460,6 +561,13 @@ var f_autogenerate_databases_and_tables = async function(){
         });
         for(var o_database of a_o_database){
             
+            // create db if it not exists
+            o_result__sql_query = await f_o__execute_query__denoxmysql(
+                `CREATE DATABASE IF NOT EXISTS ${o_database.s_name};`,
+                o_db_client,
+                null,
+            );
+
             var s_name_file = `conn_${o_db_connection_info.s_hostname}_db_${o_database.s_name}_${new Date().getTime()}.sql`
             var s_path_name_file_name = `${s_path_folder_backups}/${s_name_file}`;
             var o_command = await f_o_command(
@@ -475,28 +583,11 @@ var f_autogenerate_databases_and_tables = async function(){
                 ].join('').split(' ')
             );
             console.log(o_command)
-            // create db if it not exists
-            o_result__sql_query = await f_o__execute_query__denoxmysql(
-                `CREATE DATABASE IF NOT EXISTS ${o_database.s_name};`,
-                o_db_client,
-                null,
-            );
-            // drop it to clear all tables and be sure it does not exist
-            o_result__sql_query = await f_o__execute_query__denoxmysql(
-                f_s_query_drop_database(o_database),
-                o_db_client,
-                null,
-            );
-            // create it again (with no tables now)
-            o_result__sql_query = await f_o__execute_query__denoxmysql(
-                f_s_query_create_database(o_database),
-                o_db_client,
-                null,
-            );
-    
+
+            
             s_query += s_query__use_db;
     
-            for(let o_models_related of a_o_models_related){
+            for(let o_models_related of a_o_objectrelation_with_same_prop_val){
                 
                 var s_query_table = f_s_query_modify_table(o_models_related);
                 s_query += s_query_table;

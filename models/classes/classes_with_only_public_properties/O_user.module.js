@@ -1,5 +1,5 @@
 
-        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Tue Jan 10 2023 13:55:38 GMT+0100 (Central European Standard Time)","n_ts_created":1673355338594}
+        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Wed Jan 11 2023 17:25:14 GMT+0100 (Central European Standard Time)","n_ts_created":1673454314750}
         class O_user{
             constructor(
                n_id,

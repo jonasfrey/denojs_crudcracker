@@ -1,6 +1,6 @@
 
-        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Wed Jan 11 2023 17:25:14 GMT+0100 (Central European Standard Time)","n_ts_created":1673454314750}
-        class O_user{
+        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Wed Jan 11 2023 15:30:39 GMT+0100 (Central European Standard Time)","n_ts_created":1673447439094}
+        class O_test{
             constructor(
                n_id,
        s_name,
@@ -13,5 +13,5 @@
        this.s_modified_ts_lt = s_modified_ts_lt;
             }
         }
-        export { O_user }
+        export { O_test }
         

@@ -87,6 +87,20 @@ var o_model__O_user = new O_model(
 );
 a_o_model.push(o_model__O_user);
 
+// var o_model__O_test_added_model = new O_model(
+//     "O_test_added_model",
+//     [
+//         f_o__cloned(o_model_property__n_id_default_id),
+//         new O_model_property(
+//             "s_name", 
+//             "string",
+//         ),
+//         f_o__cloned(o_model_property__s_created_ts_lt),
+//         f_o__cloned(o_model_property__s_modified_ts_lt),
+//     ]
+// );
+// a_o_model.push(o_model__O_test_added_model);
+
 var o_model__O_chatroom = new O_model(
     "O_chatroom",
     [

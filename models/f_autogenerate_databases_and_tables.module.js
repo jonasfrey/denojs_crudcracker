@@ -152,7 +152,7 @@ var f_o_model_property__primary_key = function(o_model){
     return o_model.a_o_model_property.filter(o=> f_b_primary_key(o))[0];
 }
 var f_s_query_drop_table = function(o_model){
-    return `drop table ${o_model.s_name}`;
+    return `DROP TABLE IF EXISTS ${o_model.s_name}`;
 }
 var f_s_query_drop_column = function(
     o_model, 
@@ -163,10 +163,28 @@ var f_s_query_drop_column = function(
     return s;
 }
 var f_s_query_modify_table = function(
-    o_objectrelation_with_same_prop_val
-){
-    // renaming table columns is not supported
-    // so we dont care about that
+    a_o_with_index
+){  
+    var a_o_with_index__now = a_o_with_index.filter(o=> o.a_o == a_o_model);
+    var a_o_with_index__last = a_o_with_index.filter(o=> !a_o_with_index__now.includes(o));
+    console.log(a_o_with_index__now)
+    console.log(a_o_with_index__last)
+    
+    var a_o_model_property__now = a_o_with_index__now[0].a_o_model_property;
+    var a_o_model_property__last = a_o_with_index__now[0].a_o_model_property;
+
+    var a_a_o_with_index__o_model_property = f_a_a_o_with_index__with_same_prop_val(
+        [
+            a_o_model_property__now,
+            a_o_model_property__last
+        ],
+        's_name'
+    );
+    // you know what... 
+    // just let it be...
+    console.log(a_o_with_index);
+    console.log("what");
+    Deno.exit(-1);
 
     var s_query = '';
     if(
@@ -242,7 +260,7 @@ var f_s_query_modify_table = function(
     return s_query;
 }
 var f_s_query_create_table = function(
-    o_model, 
+    o_model
 ){
     var s_query = ``;
     var n_spaces_per_tab = 4;
@@ -250,7 +268,7 @@ var f_s_query_create_table = function(
     var a_s_table_property = [];
     s_query += 
 `
-CREATE TABLE ${f_s_table_name_from_o_model(o_model)} (
+CREATE TABLE IF NOT EXISTS ${f_s_table_name_from_o_model(o_model)} (
 `;
     for(var o_model_property of o_model.a_o_model_property){
         var s_mysql_type = f_s_mysql_type(o_model_property);
@@ -350,14 +368,22 @@ host = "${o_db_connection_info.hostname}"
 
     return o_command;
 }
+var s_path_file_last_a_o_model = "./.gitignored.a_o_model_backup/a_o_model.module.js";
 
+var f_write_a_o_model__last = async function(){
+    return f_write_file(
+        s_path_file_last_a_o_model,
+        JSON.stringify(a_o_model)
+    )
+}
 var f_a_o_model__last = async function(){
-    var s_path_file_last_a_o_model = "./.gitignored.a_o_model_backup/a_o_model.module.js";
 
     await ensureFile(s_path_file_last_a_o_model);
     var a_o_model__last = []
     try {
-        a_o_model__last = JSON.parse(await Deno.readTextfile(s_path_file_last_a_o_model));
+        var s_text = await Deno.readTextFile(s_path_file_last_a_o_model);
+        // console.log(s_text)
+        a_o_model__last = JSON.parse(s_text);
     } catch (error) {
         console.log(error)
     }
@@ -401,15 +427,22 @@ class O_objects_with_same_prop_val{
     }
 }
 
-var f_o_objects_with_same_prop_val = function(
+var f_a_a_o_with_index__with_same_prop_val = function(
     a_a_o,
     s_property_name
 ){
+
+    // looks for objects with same property name and value 
+    // in multiple arrays
     var a_a_o_with_index = []
+    var a_property_value__done = [];
     for(var a_o of a_a_o){
-        var a_o_with_index = [];
         for(var n_index in a_o){
             var o = a_o[n_index];
+            var property_value = o[s_property_name]
+            var a_o_with_index = [];
+            if(a_property_value__done.includes(property_value)){continue}
+            a_property_value__done.push(property_value)
             if(!o.hasOwnProperty(s_property_name)){continue}
             a_o_with_index.push(
                 new O_with_index(
@@ -420,17 +453,18 @@ var f_o_objects_with_same_prop_val = function(
             )
             for(var a_o2 of a_a_o){
                 if(a_o2 == a_o){continue}
-                a_o_with_index.concat(
+                a_o_with_index = a_o_with_index.concat(
                     a_o_with_index = f_a_o_with_index__same_prop_val(
                         s_property_name, 
-                        o[s_property_name], 
+                        property_value,
                         a_o2
                     )
                 )
             }
+            a_a_o_with_index.push(a_o_with_index)
         }
-        a_a_o_with_index.push(a_o_with_index)
     }
+    return a_a_o_with_index
 }
 var f_a_o_with_index__same_prop_val = function(
     s_property_name, 
@@ -440,27 +474,17 @@ var f_a_o_with_index__same_prop_val = function(
     var a_o_with_index = [];
     for(var n_index in a_o){
         var o = a_o[n_index];
-        // if the object was not found
-        // we explicityly give the information 
-        // that it was not found by having 'null' as a value
-        // generally this should not be done but this is a lazy exception... 
-        var n_index__current = null;
-        var a_o__current = null;
-        var o__current = null;
         if(o.hasOwnProperty(s_property_name)){
             if(o[s_property_name] == property_value){
-                n_index__current = n_index
-                a_o__current = a_o
-                o__current = o
+                a_o_with_index.push(
+                    new O_with_index(
+                        n_index, 
+                        a_o, 
+                        o
+                    )
+                )
             }
         }
-        a_o_with_index.push(
-            new O_with_index(
-                n_index__current, 
-                a_o__current, 
-                o__current
-            )
-        )
     }
     return a_o_with_index
 }
@@ -519,27 +543,12 @@ var f_a_o___not_existing_in_a2 = function(
 }
 var f_autogenerate_databases_and_tables = async function(){
     var a_o_model__last = await f_a_o_model__last();
-    var a_o_objectrelation_with_same_prop_val = 
-        f_a_o_with_index__with_same_prop_val(
-            a_o_model, 
-            a_o_model__last, 
-            's_name', 
-        );
+    console.log(a_o_model__last)
+    var a_a_o_with_index = f_a_a_o_with_index__with_same_prop_val(
+        [a_o_model, a_o_model__last], 
+        's_name'
+    );
 
-    //models that existed before and are now not existing anymore
-    var a_o_model__existed_before = 
-        f_a_o___not_existing_in_a2(
-            a_o_model__last, 
-            a_o_model,
-            's_name'
-        );
-    //models that did not yet exist before and are existing now
-    var a_o_model__not_existed_before = 
-        f_a_o___not_existing_in_a2(
-            a_o_model,
-            a_o_model__last, 
-            's_name'
-        );
 
     var s_path_folder_backups = "./.gitignored.db_backups";
 
@@ -586,26 +595,33 @@ var f_autogenerate_databases_and_tables = async function(){
 
             
             s_query += s_query__use_db;
-    
-            for(let o_models_related of a_o_objectrelation_with_same_prop_val){
-                
-                var s_query_table = f_s_query_modify_table(o_models_related);
-                s_query += s_query_table;
+            
+            for(let a_o_with_index of a_a_o_with_index){
+
+                if(a_o_with_index.length < 2){
+                    var o_with_index = a_o_with_index[0];
+                    if(o_with_index.a_o == a_o_model){
+                        //model is new 
+                        s_query += f_s_query_create_table(a_o_with_index[0].o);
+                    }else{
+                        //model has been removed
+                        s_query += f_s_query_drop_table(a_o_with_index[0].o);
+                    }
+                }else{
+                    console.log(`'${a_o_with_index[0].o.s_name}': the model with this name may contain changes!`)
+                    console.log("   modifying / updating the this model changes in the db table is not implemented yet")
+                    console.log("   please update a sql table manually with sql and also add the updates to a_o_model.module.js")
+                    //s_query += f_s_query_modify_table(a_o_with_index);
+                }
                 //console.log(s_query_create_table);
             }
 
-            for(let o_model__existed_before of a_o_model__existed_before){
-                s_query += f_s_query_drop_database(o_model__existed_before);
-            }
-            for(let o_model__not_existed_before of a_o_model__not_existed_before){
-                s_query += f_s_query_create_table(o_model__not_existed_before);
-            }
 
             o_result__sql_query = await f_o__execute_query__denoxmysql(
                 s_query,
                 o_db_client,
                 o_database,
-            );;
+            );
             console.log(o_result__sql_query)
 
             //     var s_sql_comment_prefix = '-- '// the space after '--' is important !
@@ -622,6 +638,8 @@ var f_autogenerate_databases_and_tables = async function(){
         }
 
     };
+
+    await f_write_a_o_model__last();
 
 }
 

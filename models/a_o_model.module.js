@@ -1,13 +1,22 @@
 import { O_model } from "./O_model.module.js"
 import { 
     O_model_property,
-    O_model_property_key
+    O_model_property_key, 
+    o_s_type
 } from "./O_model_property.module.js"
+
 
 console.log("note: re-naming of o_model_property is not possible automatically, if you want to rename a table column you have to rename it manually via sql by using a sql query similar to: `ALTER TABLE table_name RENAME COLUMN old_name TO new_name;`")
 
 var f_o__cloned = function(o){
     return Object.assign(Object.create(Object.getPrototypeOf(o)), o);
+}
+var f_a_o__cloned = function(a_o){
+    var a_o__cloned = []
+    for(var o of a_o){
+        a_o__cloned.push(f_o__cloned(o))
+    }
+    return a_o__cloned
 }
 
 var a_o_model = [];
@@ -20,7 +29,8 @@ var o_model_property_key__default_primary = new O_model_property_key(
 
 var o_model_property__n_id_default_id = new O_model_property(
     "n_id", 
-    "integer",
+    o_s_type.s_integer,
+    true, 
     false, 
     null, 
     null, 
@@ -36,7 +46,8 @@ var f_o_model_property__foreign_key = function(o_model){
 
     return new O_model_property(
         f_s_foreign_key_name_from_o_model(o_model),
-        "integer",
+        o_s_type.s_integer,
+        false, 
         false, 
         null, 
         null, 
@@ -52,9 +63,10 @@ var f_o_model_property__foreign_key = function(o_model){
         )
     )
 }
-var o_model_property__s_created_ts_lt = new O_model_property(
-    "s_created_ts_lt", 
-    "string",
+var o_model_property__s_ts_lt__created = new O_model_property(
+    "s_ts_lt__created", 
+    o_s_type.s_string,
+    false, 
     false, 
     null, 
     null, 
@@ -62,9 +74,10 @@ var o_model_property__s_created_ts_lt = new O_model_property(
     null, 
     null
 );
-var o_model_property__s_modified_ts_lt = new O_model_property(
-    "s_modified_ts_lt", 
-    "string",
+var o_model_property__s_ts_lt__modified = new O_model_property(
+    "s_ts_lt__modified", 
+    o_s_type.s_string,
+    false, 
     false, 
     null, 
     null, 
@@ -72,17 +85,43 @@ var o_model_property__s_modified_ts_lt = new O_model_property(
     null, 
     null
 );
-
+var o_model_property__n_ts_sec_lt__created = new O_model_property(
+    "n_ts_sec_lt__created", 
+    o_s_type.s_integer,
+    false,
+    false, 
+    null, 
+    null, 
+    null,
+    null, 
+    null
+);
+var o_model_property__n_ts_sec_lt__modified = new O_model_property(
+    "n_ts_sec_lt__modified", 
+    o_s_type.s_integer,
+    false, 
+    false, 
+    null, 
+    null, 
+    null,
+    null, 
+    null
+);
+var a_o_model__timestamps = [
+    o_model_property__s_ts_lt__created,
+    o_model_property__s_ts_lt__modified,
+    o_model_property__n_ts_sec_lt__created,
+    o_model_property__n_ts_sec_lt__modified,
+]
 var o_model__O_user = new O_model(
     "O_user",
     [
         f_o__cloned(o_model_property__n_id_default_id),
         new O_model_property(
             "s_name", 
-            "string",
+            o_s_type.s_string,
         ),
-        f_o__cloned(o_model_property__s_created_ts_lt),
-        f_o__cloned(o_model_property__s_modified_ts_lt),
+        ...f_a_o__cloned(a_o_model__timestamps)
     ]
 );
 a_o_model.push(o_model__O_user);
@@ -93,7 +132,7 @@ a_o_model.push(o_model__O_user);
 //         f_o__cloned(o_model_property__n_id_default_id),
 //         new O_model_property(
 //             "s_name", 
-//             "string",
+//             o_s_type.s_string,
 //         ),
 //         f_o__cloned(o_model_property__s_created_ts_lt),
 //         f_o__cloned(o_model_property__s_modified_ts_lt),
@@ -107,10 +146,10 @@ var o_model__O_chatroom = new O_model(
         f_o__cloned(o_model_property__n_id_default_id),
         new O_model_property(
             "s_name", 
-            "string",
+            o_s_type.s_string,
         ),
-        f_o__cloned(o_model_property__s_created_ts_lt),
-        f_o__cloned(o_model_property__s_modified_ts_lt),
+        ...f_a_o__cloned(a_o_model__timestamps)
+
     ]
 );
 a_o_model.push(o_model__O_chatroom);
@@ -120,10 +159,10 @@ var o_model__O_message = new O_model(
         f_o__cloned(o_model_property__n_id_default_id),
         new O_model_property(
             "s_markdown", 
-            "string",
+            o_s_type.s_string,
         ),
-        f_o__cloned(o_model_property__s_created_ts_lt),
-        f_o__cloned(o_model_property__s_modified_ts_lt),
+        ...f_a_o__cloned(a_o_model__timestamps)
+
     ]
 );
 a_o_model.push(o_model__O_message);
@@ -136,8 +175,8 @@ var o_model__O_user_o_message_o_chatroom = new O_model(
         f_o_model_property__foreign_key(o_model__O_user), // n_o_user_n_id
         f_o_model_property__foreign_key(o_model__O_message), // n_o_message_n_id
         f_o_model_property__foreign_key(o_model__O_chatroom), // n_o_chatroom_n_id
-        f_o__cloned(o_model_property__s_created_ts_lt),
-        f_o__cloned(o_model_property__s_modified_ts_lt),
+        ...f_a_o__cloned(a_o_model__timestamps)
+
     ]
 );
 a_o_model.push(o_model__O_user_o_message_o_chatroom);

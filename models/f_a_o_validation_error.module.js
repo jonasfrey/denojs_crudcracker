@@ -1,13 +1,9 @@
 import {a_o_model} from "./a_o_model.module.js"
 
-
-
-
 f_a_o_validation_error__o_model = function(
     o_value,
     s_model_name
 ){
-
     var a_o_validation_error__o_model = [];
     var a_o_validation_error__o_model_property = [];
     var o_model = a_o_model.filter(
@@ -243,8 +239,6 @@ f_a_o_validation_error__o_model_property__datatype = function(
     }
     return a_o_validation_error__o_model_property__datatype;
 }
-
-
 
 
 export { 

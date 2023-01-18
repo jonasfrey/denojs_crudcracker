@@ -22,6 +22,13 @@ var f_autogenerate_classes = async function(){
     var a_s_model_name = a_o_model.map(o=>o.s_name);
     for await (const o_entry of Deno.readDir(s_path_folder_classes_with_public_and_private_properties)) {
         if (o_entry.isFile) {
+            var s_mod_suffix  = 'module.js'
+            var n_index = o_entry.name.indexOf(s_mod_suffix);
+            if(n_index != (o_entry.name.length-s_mod_suffix.length)){
+                console.log(`${o_entry.name}: skipping file because it does not end with ${s_mod_suffix}`)
+                continue
+            }
+
             var s_name_file = o_entry.name;
             var a_s = s_name_file.split(".");
             var s_model_name = a_s.shift();

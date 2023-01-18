@@ -9,6 +9,19 @@ import {f_o_command} from "https://deno.land/x/o_command@0.5/O_command.module.js
 
 import { Client } from "https://deno.land/x/mysql/mod.ts";
 
+var s_path_file__query_logs = "./query_logs_tmp.gitignored.sql"
+var s_txt_query_logs = "-- "+new Date().toString()+"\n";
+await ensureFile(s_path_file__query_logs);
+await f_write_file(
+    s_path_file__query_logs,
+    //clear log
+    ''
+)
+import {
+    f_o__execute_query__denoxmysql,
+    f_o_command__execute_query_terminalcommand
+} from "./db_io.module.js"
+
 function f_s_repeated(n, s=' '){
     return new Array(n+1).join(s);
 }
@@ -138,7 +151,8 @@ var f_b_primary_key = function(o_model_property){
 }
 var f_b_auto_increment = function(o_model_property){
     // todo: for the moment if property is primary key it also is autoincrement
-    return f_b_primary_key(o_model_property);
+    return o_model_property.b_auto_increment;
+    // return f_b_primary_key(o_model_property);
 }
 var f_a_o_model_from_o_model_property = function(o_model_property){
     // console.log(o_model_property)
@@ -312,62 +326,6 @@ var f_s_query_drop_database = function(o_database){
     return `DROP DATABASE ${o_database.s_name}`
 }
 
-var f_o__execute_query__denoxmysql = async function(
-    s_query, 
-    o_db_client,
-    o_database = null, 
-){
-    // since the library can only run one statement at the time
-    var a_s_sql_statement = s_query.split(';');
-    a_s_sql_statement = a_s_sql_statement.filter(s => s.trim() != '');
-    // console.log(a_s_sql_statement)
-    if(o_database != null){
-        var result = await o_db_client.execute(`USE ${o_database.s_name}`);
-    }
-    for(let s_sql_statement of a_s_sql_statement){
-        try {
-            var result = await o_db_client.execute(s_sql_statement);
-        } catch (o_e) {
-            console.log(`f_o__execute_query__denoxmysql: query: ${s_sql_statement}`)
-            // console.log(o_e.message)
-            throw o_e;
-        }
-    }
-    return result;
-}
-var f_o_command__execute_query_terminalcommand = async function(
-    s_query, 
-    o_db_connection_info,
-    o_database = null,
-){
-    s_query = `-e "${s_query}"`
-
-    if(o_database != null){
-        var s_query = `-e "use ${o_database.s_name}; ${s_query}"`
-    }
-
-    var s_path_file__db_connection_info = `./tmpcnf_from_f_execute_query.cnf`;
-    await f_write_file(
-        s_path_file__db_connection_info, 
-        `
-[client]
-user = "${o_db_connection_info.username}"
-password = "${o_db_connection_info.password}"
-host = "${o_db_connection_info.hostname}"        
-`);
-
-    var s_command = `mysql --defaults-extra-file=${s_path_file__db_connection_info} ${s_query}`;
-    var o_command = await f_o_command(s_command.split(' '));
-
-    // console.log(o_command);
-    // if(o_command?.s_stderr != ''){
-    //     console.log(o_command.s_stderr)
-    // }
-    // console.log(o_command.s_stdout)
-    Deno.remove(s_path_file__db_connection_info);
-
-    return o_command;
-}
 var s_path_file_last_a_o_model = "./.gitignored.a_o_model_backup/a_o_model.module.js";
 
 var f_write_a_o_model__last = async function(){
@@ -570,15 +528,19 @@ var f_autogenerate_databases_and_tables = async function(){
         });
         for(var o_database of a_o_database){
             
+            var s_qry = `CREATE DATABASE IF NOT EXISTS ${o_database.s_name};`
             // create db if it not exists
             o_result__sql_query = await f_o__execute_query__denoxmysql(
-                `CREATE DATABASE IF NOT EXISTS ${o_database.s_name};`,
+                s_qry,
                 o_db_client,
                 null,
             );
-
+            s_txt_query_logs+='\n'+s_qry;
             var s_name_file = `conn_${o_db_connection_info.s_hostname}_db_${o_database.s_name}_${new Date().getTime()}.sql`
             var s_path_name_file_name = `${s_path_folder_backups}/${s_name_file}`;
+            
+            await ensureFile(`${s_path_folder_backups}/conn_tmp_empty.sql`);
+
             var o_command = await f_o_command(
                 ` rm ${s_path_folder_backups}/conn_*.sql`.split(' ')
             );
@@ -596,32 +558,38 @@ var f_autogenerate_databases_and_tables = async function(){
             
             s_query += s_query__use_db;
             
-            for(let a_o_with_index of a_a_o_with_index){
-
-                if(a_o_with_index.length < 2){
-                    var o_with_index = a_o_with_index[0];
-                    if(o_with_index.a_o == a_o_model){
-                        //model is new 
-                        s_query += f_s_query_create_table(a_o_with_index[0].o);
-                    }else{
-                        //model has been removed
-                        s_query += f_s_query_drop_table(a_o_with_index[0].o);
-                    }
-                }else{
-                    console.log(`'${a_o_with_index[0].o.s_name}': the model with this name may contain changes!`)
-                    console.log("   modifying / updating the this model changes in the db table is not implemented yet")
-                    console.log("   please update a sql table manually with sql and also add the updates to a_o_model.module.js")
-                    //s_query += f_s_query_modify_table(a_o_with_index);
-                }
-                //console.log(s_query_create_table);
+            // for(let a_o_with_index of a_a_o_with_index){
+            //     if(a_o_with_index.length < 2){
+            //         var o_with_index = a_o_with_index[0];
+            //         if(o_with_index.a_o == a_o_model){
+            //             //model is new 
+            //             s_query += f_s_query_create_table(a_o_with_index[0].o);
+            //         }else{
+            //             //model has been removed
+            //             s_query += f_s_query_drop_table(a_o_with_index[0].o);
+            //         }
+            //     }else{
+            //         console.log(`'${a_o_with_index[0].o.s_name}': the model with this name may contain changes!`)
+            //         console.log("   modifying / updating the this model changes in the db table is not implemented yet")
+            //         console.log("   please update a sql table manually with sql and also add the updates to a_o_model.module.js")
+            //         //s_query += f_s_query_modify_table(a_o_with_index);
+            //     }
+            //     //console.log(s_query_create_table);
+            // }
+            
+            // for simplicity sake we don't care about removed or updated models, 
+            // we just create every model if it is not existing yet
+            for(var o_model of a_o_model){
+                s_query += f_s_query_create_table(o_model);
             }
-
-
             o_result__sql_query = await f_o__execute_query__denoxmysql(
                 s_query,
                 o_db_client,
                 o_database,
             );
+            s_txt_query_logs+='\n'+s_query;
+
+
             console.log(o_result__sql_query)
 
             //     var s_sql_comment_prefix = '-- '// the space after '--' is important !
@@ -638,9 +606,12 @@ var f_autogenerate_databases_and_tables = async function(){
         }
 
     };
-
     await f_write_a_o_model__last();
-
+    await f_write_file(
+        s_path_file__query_logs,
+        s_txt_query_logs
+    );
+    console.log(`db has successfully been updated! temp file of all queries executed can be found here: ${s_path_file__query_logs}`)
 }
 
 

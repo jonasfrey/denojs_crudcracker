@@ -4,7 +4,7 @@ import { O_file_info } from "./O_file_info.module.js";
 import { O_media } from "./O_media.module.js";
 import {f_o_command} from "https://deno.land/x/o_command@0.3/O_command.module.js"
 
-import {a_o_model} from "./../models/a_o_model.module.js";
+import {a_o_model} from "../models/a_o_model.module.js";
 import { f_o_model_related } from "../models/f_o_model_related.module.js";
 
 var s_url_api = "http://127.0.0.1:1337/api"

@@ -9,10 +9,17 @@ class O_validation_error{
     }
 }
 
+var o_s_type = {
+    s_string: "string", 
+    s_integer: "integer",
+    s_float: "float"
+}
+
 class O_model_property{
     constructor(
         s_name,
         s_type,
+        b_auto_increment = false,
         b_private = false,
         o_model_property_validation = null,
         default_value = null, 
@@ -21,7 +28,15 @@ class O_model_property{
         o_model_property_key = null
     ){
         this.s_name = s_name
+        var a_s_type = Object.values(o_s_type);
+        if(!a_s_type.includes(s_type)){
+            var s_msg = `${s_type}: is not a valid s_type, s_type must be one of ${a_s_type.join(',')}`;
+            // console.log(s_msg);
+            throw Error(s_msg)
+            return 1;
+        }
         this.s_type = s_type
+        this.b_auto_increment = b_auto_increment
         this.b_private = b_private
         this.o_model_property_validation = o_model_property_validation
         this.default_value = default_value
@@ -63,8 +78,10 @@ class O_model_property_key{
     }
 }
 
+
 export {
     O_model_property,
     O_model_property_validation,
-    O_model_property_key
+    O_model_property_key, 
+    o_s_type
 }

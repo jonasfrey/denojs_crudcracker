@@ -2,9 +2,9 @@ import { a_o__testdata } from "./a_o__testdata.module.js";
 
 import { f_create } from "./../models/crud_functions_db.module.js";
 
-import { f_o__execute_query__denoxmysql } from "../models/db_io.module.js";
+import { f_o__execute_query__denoxmysql } from "../database/db_io.module.js";
 
-import { a_o_database } from "../models/a_o_database.module.js";
+import { a_o_database } from "../database/a_o_database.module.js";
 
 import { Client } from "https://deno.land/x/mysql/mod.ts";
 
@@ -26,8 +26,9 @@ var f_create_test_data = async function(){
             console.log(o_database)
             for(var o of a_o__testdata){
                 var s_model_name = o.constructor.name;
-                var o_result = await f_create(s_model_name, o, o_db_client)
-                console.log(o_result)
+                // var o = await f_a_o_read_indb({})
+                // var o_result = await f_create(s_model_name, o, o_db_client)
+                // console.log(o_result)
             }
     
         }

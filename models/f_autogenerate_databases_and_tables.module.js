@@ -20,7 +20,7 @@ await f_write_file(
 import {
     f_o__execute_query__denoxmysql,
     f_o_command__execute_query_terminalcommand
-} from "./db_io.module.js"
+} from "../db_io.module.js"
 
 function f_s_repeated(n, s=' '){
     return new Array(n+1).join(s);
@@ -499,6 +499,24 @@ var f_a_o___not_existing_in_a2 = function(
     )
     return a_o
 }
+var f_drop_databases = async function(){
+    for(var o_db_connection_info of a_o_db_connection_info){
+        var o_db_client = await new Client().connect({
+            hostname: o_db_connection_info.s_hostname, 
+            port: o_db_connection_info.n_port,
+            username: o_db_connection_info.s_username, 
+            password: o_db_connection_info.s_password, 
+        });
+        for(var o_database of a_o_database){
+            var o_result__sql_query = await f_o__execute_query__denoxmysql(
+                `drop database ${o_database.s_name}`,
+                o_db_client,
+                o_database,
+            );
+        }
+        await o_db_client.close();
+    }
+}
 var f_autogenerate_databases_and_tables = async function(){
     var a_o_model__last = await f_a_o_model__last();
     console.log(a_o_model__last)
@@ -507,14 +525,13 @@ var f_autogenerate_databases_and_tables = async function(){
         's_name'
     );
 
-
     var s_path_folder_backups = "./.gitignored.db_backups";
 
-    console.log(`! this will override the backup files in ${s_path_folder_backups} drop db tables and create them again !`)
-    var b_exit = prompt('continue?: [y/n]').toLowerCase() != 'y';
-    if(b_exit){
-        return;
-    }
+    // console.log(`! this will override the backup files in ${s_path_folder_backups} drop db tables and create them again !`)
+    // var b_exit = prompt('continue?: [y/n]').toLowerCase() != 'y';
+    // if(b_exit){
+    //     return;
+    // }
     var s_query = ``;
     var s_query__use_db = ``;
     var o_result__sql_query =  null; 
@@ -604,6 +621,7 @@ var f_autogenerate_databases_and_tables = async function(){
 
             //     await f_execute_query_on_specific_db(s_query, o_database)
         }
+        await o_db_client.close();
 
     };
     await f_write_a_o_model__last();
@@ -617,4 +635,5 @@ var f_autogenerate_databases_and_tables = async function(){
 
 export {
     f_autogenerate_databases_and_tables,
+    f_drop_databases
 }

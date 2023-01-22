@@ -1,4 +1,10 @@
 import {a_o_model} from "./a_o_model.module.js";
+import { O_api_request } from "./classes/O_api_request.module.js";
+import 
+    * as o_mod__db_crud_functions
+    from "./../database/db_crud_functions.module.js"
+import { a_o_crud_operation_callback } from "./a_o_crud_operation_callback.module.js";
+import { O_crud_operation_result } from "./classes/O_crud_operation_result.module.js";
 
 var f_o_model_related = function(s_prop_name){
     // n_o_finger_n_id -> 'n_', 'o_finger_', 'n_id'
@@ -91,7 +97,161 @@ var f_o__casted_to_class = function(
     return o_class_instance
 }
 
+// crud functions
+
+var f_o_api_request = function(
+    o_request
+){
+    if(o_request instanceof O_api_request){
+        return o_request
+    }
+    var o_api_request = f_o__casted_to_class(
+        o_request,
+        O_api_request
+    );
+    for(var n_index in o_api_request.a_o_crud_operation_request){
+        var o_crud_operation_request = f_o__casted_to_class(
+            o_api_request.a_o_crud_operation_request[n_index],
+            O_crud_operation_request
+        );
+        o_api_request.a_o_crud_operation_request[n_index] = o_crud_operation_request;
+    }
+    return o_api_request;
+}
+var f_o_api_response = function(
+    o_api_request
+){
+    var o_api_response = new O_api_response();
+    var a_s_msg_error = [];
+    try{
+        var b_echo_json = false; 
+        o_api_response.a_o_crud_operation_result = []
+        var o_api_request = f_o_api_request(o_api_request);
+        o_api_response.o_api_request = o_api_request
+        for(let o_crud_operation_request of o_api_request.a_o_crud_operation_request){
+            let o_crud_operation_result = f_o_crud_operation_result(o_crud_operation_request);
+        }
+        if(o_crud_operation_request.a_o_validation_error.length != 0){
+            o_api_response.b_succuess = false; 
+            a_s_msg_error.push("there has been at least one validation error")
+        }
+        o_api_response.a_o_crud_operation_result.push(
+            o_crud_operation_result
+        );
+    }catch(e){
+        o_api_request.b_succuess = false;
+        a_s_msg_error.push(e.message)
+    }
+    o_api_response.s_message = a_s_msg_error.join("\n,");
+    
+    return o_api_response;
+
+}
+
+
+var o_s_fname_f_function_inside_crud_operation_process = {
+    [`f_a_o_validation_error`] : f_a_o_validation_error, 
+    [`f_a_o_crud_in_db`] : f_a_o_crud_in_db,
+}
+
+let f_o_crud_operation_result = function(
+    o_crud_operation_request,
+){
+    let s_model_name_camel_case = f_s_model_name_camel_case(o_crud_operation_request.s_model_name);
+    var o_crud_operation_result = new O_crud_operation_result()
+    o_crud_operation_result.a_o_validation_error = []
+    o_crud_operation_result.a_o_instance_from_db = []
+
+
+    let f = f_a_o_validation_error;
+    f_call_all_o_crud_operation_callback_f_callback(
+        true, 
+        f, 
+        o_crud_operation_request,
+        o_crud_operation_response,
+    );
+
+    if(
+        s_crud_operation_name == "create"
+        ||
+        s_crud_operation_name == "update"
+    ){
+        o_crud_operation_result.a_o_validation_error = f($s_model_name, $o_instance);
+        f_call_all_o_crud_operation_callback_f_callback(
+            false, 
+            f, 
+            o_crud_operation_request,
+            o_crud_operation_response,
+        );
+    
+    }
+
+    if(empty($a_o_validation_error)){
+
+        let f = f_a_o_crud_in_db;
+
+        f_call_all_o_crud_operation_callback_f_callback(
+            true, 
+            f, 
+            o_crud_operation_request,
+            o_crud_operation_response,
+        );
+
+        a_o_instance_from_db = f(o_instance, s_table_name);
+        
+        f_call_all_o_crud_operation_callback_f_callback(
+            true, 
+            f, 
+            o_crud_operation_request,
+            o_crud_operation_response,
+        );
+    }
+
+    return new O_crud_operation_result(
+        a_o_validation_error,
+        o_instance,
+        a_o_instance_from_db 
+    );
+
+}
+var f_call_all_o_crud_operation_callback_f_callback = function(
+    b_execute_callback_before, 
+    f_function_inside_crud_operation_process, 
+
+    o_crud_operation_request,
+    o_crud_operation_response,
+){
+    a_o_crud_operation_callback__filtered = a_o_crud_operation_callback.filter(
+        o=> o.b_execute_callback_before == b_execute_callback_before && o.f_function_inside_crud_operation_process == f_function_inside_crud_operation_process
+    );
+    for(var o_crud_operation_request of a_o_crud_operation_callback__filtered){
+        o_crud_operation_request.f_callback(
+            o_crud_operation_request,
+            o_crud_operation_response,
+        )
+    }
+}
+let f_a_o_crud_in_db = function(
+    o_instance, 
+    s_model_name, 
+    s_table_name,
+    s_crud_operation_name
+){
+    var s_function_name_db_crud_operation = `f_a_o_${s_crud_operation_name}_indb` 
+    return o_mod__db_crud_functions[s_function_name_db_crud_operation](
+        o_instance, 
+        s_table_name
+    );
+}
+
+if(
+    Deno.args[0] == "test"
+){
+    
+}
+
 export {
+    o_s_fname_f_function_inside_crud_operation_process, 
     f_o__casted_to_class, 
     f_s_model_name_camel_case,
     f_s_model_name_snake_case, 

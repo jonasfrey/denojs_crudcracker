@@ -1,3 +1,4 @@
+import { f_o__execute_query__denoxmysql } from "../database/db_io.module.js";
 import { O_model } from "./O_model.module.js"
 import { 
     O_model_property,
@@ -150,7 +151,7 @@ var o_model__O_chatroom = new O_model(
         ),
         ...f_a_o__cloned(a_o_model__timestamps)
 
-    ]
+    ],
 );
 a_o_model.push(o_model__O_chatroom);
 var o_model__O_message = new O_model(

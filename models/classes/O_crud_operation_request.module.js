@@ -11,4 +11,10 @@ class O_crud_operation_request{
         this.s_table_name = s_table_name
     }
 }
+var o_s_crud_operation_name = {
+    s_create: "create",
+    s_create: "read",
+    s_create: "update",
+    s_create: "delete",
+}
 export { O_crud_operation_request }

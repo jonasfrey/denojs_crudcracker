@@ -5,7 +5,7 @@ import {
     f_o__execute_query__denoxmysql,
     f_o_command__execute_query_terminalcommand
 } from "./db_io.module.js"
-import { a_o_db_connection_info } from "../models/a_o_db_connection_info.gitignored.module.js";
+import { a_o_db_connection_info } from "../database/a_o_db_connection_info.gitignored.module.js";
 
 
 import { Client } from "https://deno.land/x/mysql/mod.ts";

@@ -1,6 +1,8 @@
 import {a_o_model} from "./a_o_model.module.js"
+import {O_validation_error__o_model} from "./classes/O_validation_error__o_model.module.js";
+import {O_validation_error__o_model_property} from "./classes/O_validation_error__o_model_property.module.js";
 
-f_a_o_validation_error__o_model = function(
+let f_a_o_validation_error__o_model = function(
     o_value,
     s_model_name
 ){
@@ -85,7 +87,7 @@ f_a_o_validation_error__o_model = function(
 }
 
 
-f_a_o_validation_error__o_model_property = function(
+let f_a_o_validation_error__o_model_property = function(
     property_value,
     o_model_property
 ){
@@ -107,7 +109,7 @@ f_a_o_validation_error__o_model_property = function(
     return a_o_validation_error__o_model_property;
 
 }
-f_a_o_validation_error__o_model_property_datacontent = function(
+let f_a_o_validation_error__o_model_property_datacontent = function(
     property_value,
     o_model_property
 ){
@@ -213,7 +215,7 @@ f_a_o_validation_error__o_model_property_datacontent = function(
     return a_o_validation_error__o_model_property_datacontent;
 
 }
-f_a_o_validation_error__o_model_property__datatype = function(
+let f_a_o_validation_error__o_model_property__datatype = function(
     property_value,
     o_model_property
 ){

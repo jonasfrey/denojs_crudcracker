@@ -1,9 +1,14 @@
 import {a_o_model} from "./a_o_model.module.js";
-import { O_api_request } from "./classes/O_api_request.module.js";
 import 
     * as o_mod__db_crud_functions
-    from "./../database/db_crud_functions.module.js"
+    from "../database/db_crud_functions.module.js"
 import { a_o_crud_operation_callback } from "./a_o_crud_operation_callback.module.js";
+import {f_a_o_validation_error__o_model} from "./validaton.module.js";
+
+import { O_api_response } from "./classes/O_api_response.module.js";
+import { O_api_request } from "./classes/O_api_request.module.js";
+
+import { O_crud_operation_request } from "./classes/O_crud_operation_request.module.js";
 import { O_crud_operation_result } from "./classes/O_crud_operation_result.module.js";
 
 var f_o_model_related = function(s_prop_name){
@@ -118,7 +123,7 @@ var f_o_api_request = function(
     }
     return o_api_request;
 }
-var f_o_api_response = function(
+let f_o_api_response = async function(
     o_api_request
 ){
     var o_api_response = new O_api_response();
@@ -145,14 +150,9 @@ var f_o_api_response = function(
     o_api_response.s_message = a_s_msg_error.join("\n,");
     
     return o_api_response;
-
 }
 
 
-var o_s_fname_f_function_inside_crud_operation_process = {
-    [`f_a_o_validation_error`] : f_a_o_validation_error, 
-    [`f_a_o_crud_in_db`] : f_a_o_crud_in_db,
-}
 
 let f_o_crud_operation_result = function(
     o_crud_operation_request,
@@ -163,12 +163,12 @@ let f_o_crud_operation_result = function(
     o_crud_operation_result.a_o_instance_from_db = []
 
 
-    let f = f_a_o_validation_error;
+    let f = f_a_o_validation_error__o_model;
     f_call_all_o_crud_operation_callback_f_callback(
         true, 
         f, 
         o_crud_operation_request,
-        o_crud_operation_response,
+        o_crud_operation_result,
     );
 
     if(
@@ -176,12 +176,12 @@ let f_o_crud_operation_result = function(
         ||
         s_crud_operation_name == "update"
     ){
-        o_crud_operation_result.a_o_validation_error = f($s_model_name, $o_instance);
+        o_crud_operation_result.a_o_validation_error = f(o_instance, s_model_name);
         f_call_all_o_crud_operation_callback_f_callback(
             false, 
             f, 
             o_crud_operation_request,
-            o_crud_operation_response,
+            o_crud_operation_result,
         );
     
     }
@@ -194,7 +194,7 @@ let f_o_crud_operation_result = function(
             true, 
             f, 
             o_crud_operation_request,
-            o_crud_operation_response,
+            o_crud_operation_result,
         );
 
         a_o_instance_from_db = f(o_instance, s_table_name);
@@ -203,7 +203,7 @@ let f_o_crud_operation_result = function(
             true, 
             f, 
             o_crud_operation_request,
-            o_crud_operation_response,
+            o_crud_operation_result,
         );
     }
 
@@ -219,15 +219,15 @@ var f_call_all_o_crud_operation_callback_f_callback = function(
     f_function_inside_crud_operation_process, 
 
     o_crud_operation_request,
-    o_crud_operation_response,
+    o_crud_operation_result,
 ){
-    a_o_crud_operation_callback__filtered = a_o_crud_operation_callback.filter(
+    let a_o_crud_operation_callback__filtered = a_o_crud_operation_callback.filter(
         o=> o.b_execute_callback_before == b_execute_callback_before && o.f_function_inside_crud_operation_process == f_function_inside_crud_operation_process
     );
     for(var o_crud_operation_request of a_o_crud_operation_callback__filtered){
         o_crud_operation_request.f_callback(
             o_crud_operation_request,
-            o_crud_operation_response,
+            o_crud_operation_result,
         )
     }
 }
@@ -250,6 +250,11 @@ if(
     
 }
 
+var o_s_fname_f_function_inside_crud_operation_process = {
+    [`f_a_o_validation_error__o_model`] : f_a_o_validation_error__o_model, 
+    [`f_a_o_crud_in_db`] : f_a_o_crud_in_db,
+}
+
 export {
     o_s_fname_f_function_inside_crud_operation_process, 
     f_o__casted_to_class, 
@@ -257,5 +262,7 @@ export {
     f_s_model_name_snake_case, 
     f_o_model_related,
     f_a_o_model_filtered__child_model, 
-    f_o_model_filtered__parent_model
+    f_o_model_filtered__parent_model, 
+    f_o_crud_operation_result, 
+    f_o_api_response
 }

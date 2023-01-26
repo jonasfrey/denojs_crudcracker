@@ -1,6 +1,6 @@
 import { a_o_model } from "../models/a_o_model.module.js";
 import { a_o_database } from "./a_o_database.module.js";
-
+import { o_s_table_name_s_id_name } from "./o_s_table_name_s_id_name.module.js";
 import {
     f_o__execute_query__denoxmysql,
     f_o_command__execute_query_terminalcommand
@@ -64,9 +64,11 @@ var f_s_where_statement = function(o_data){
 var f_s_set_statement = function(o_data){
     return `set ${Object.keys(o_data).map(s => `${s} = '${o_data[s]}'`).join(",")}`;
 }
+var o_database__last_used = null;
+
 var f_a_o_read_indb = async function(
     o_data,
-    s_table_name, 
+    s_table_name,
     o_db_client
 ){
     var s_query = `
@@ -79,21 +81,33 @@ var f_a_o_read_indb = async function(
 }
 var f_a_o_create_indb = async function(
     o_data,
-    s_table_name, 
+    s_table_name,
     o_db_client
 ){
     var a_s_prop_name = Object.keys(o_data);
     var a_value = Object.values(o_data);
     var s_query = `insert into ${s_table_name}(${a_s_prop_name.join(',')}) values(${a_value.map(v => `'${v.toString()}'`).join(',')})`;
     var o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
-    //
-    // console.log(o_result);
-    return o_result.rows;
+
+    var s_name_id = o_s_table_name_s_id_name[s_table_name]; 
+    if(!s_name_id){
+        s_name_id = "n_id"
+    }
+    var a_o = await f_a_o_read_indb(
+        {[s_name_id]: o_result.lastInsertId},
+        s_table_name,
+        o_db_client
+    )
+    if(a_o.length == 0){
+        return [o_result]
+    }
+    
+    return a_o;
 }
 var f_a_o_update_indb = async function(
     o_data,
     o_data_where,
-    s_table_name, 
+    s_table_name,
     o_db_client
 ){
     var s_query = `
@@ -166,4 +180,8 @@ export {
     f_read, 
     f_update, 
     f_delete, 
+    f_a_o_read_indb,
+    f_a_o_create_indb,
+    f_a_o_update_indb,
+    f_a_o_delete_indb
 }

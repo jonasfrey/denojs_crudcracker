@@ -16,6 +16,7 @@ var f_o__execute_query__denoxmysql = async function(
         try {
             var result = await o_db_client.execute(s_sql_statement);
         } catch (o_e) {
+            
             console.log(`f_o__execute_query__denoxmysql: query: ${s_sql_statement}`)
             // console.log(o_e.message)
             throw o_e;

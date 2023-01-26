@@ -37,7 +37,7 @@ let f_a_o_validation_error__o_model = function(
 
     for(var s_property_name in o_value){
         var property_value = o_value[s_property_name];
-        var o_model_property = this.a_o_model_property.filter(
+        var o_model_property = o_model.a_o_model_property.filter(
             o=>o.s_name == s_property_name
         )[0];
         if(!o_model_property){
@@ -91,15 +91,15 @@ let f_a_o_validation_error__o_model_property = function(
     property_value,
     o_model_property
 ){
-    var a_o_validation_error__o_model_property_datacontent = this.f_a_o_validation_error__o_model_property_datacontent(
+    var a_o_validation_error__o_model_property_datacontent = f_a_o_validation_error__o_model_property_datacontent(
         property_value,
         o_model_property
     );
-    var a_o_validation_error__o_model_property__datatype = this.f_a_o_validation_error__o_model_property__datatype(
+    var a_o_validation_error__o_model_property__datatype = f_a_o_validation_error__o_model_property__datatype(
         property_value,
         o_model_property
     );
-    a_o_validation_error__o_model_property = a_o_validation_error__o_model_property_datacontent.concat(
+    let a_o_validation_error__o_model_property = a_o_validation_error__o_model_property_datacontent.concat(
         a_o_validation_error__o_model_property__datatype
     );
 

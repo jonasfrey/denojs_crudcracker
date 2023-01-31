@@ -61,7 +61,7 @@ var o_user_o_message_o_chatroom = new o_o_class.O_user_o_message_o_chatroom(
 
 var n_id__auto_increment = 0; // 0 is defined as auto increment
 var o_user__alice = new o_o_class.O_user(
-    n_id__auto_increment,// 0 is defined as auto increment
+    undefined,//n_id__auto_increment,// 0 is defined as auto increment
     'new_user_lol',
     ...a_timestamps
 );

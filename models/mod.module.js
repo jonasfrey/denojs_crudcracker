@@ -8,12 +8,14 @@ import { a_o_db_connection_info } from "../database/a_o_db_connection_info.gitig
 import { Client } from "https://deno.land/x/mysql/mod.ts";
 import { a_o_database } from "../database/a_o_database.module.js";
 
+import {f_o__casted_to_class} from "https://deno.land/x/f_o__casted_to_class@0.6/f_o__casted_to_class.module.js"
+
 import { O_api_response } from "./classes/O_api_response.module.js";
 import { O_api_request } from "./classes/O_api_request.module.js";
 
 import { O_crud_operation_request } from "./classes/O_crud_operation_request.module.js";
 import { O_crud_operation_result } from "./classes/O_crud_operation_result.module.js";
-import { f_o__execute_query__denoxmysql } from "../database/db_io.module.js";
+import { f_o__execute_query__denoxmysql } from "../database/mod.module.js";
 
 var f_o_model_related = function(s_prop_name){
     // n_o_finger_n_id -> 'n_', 'o_finger_', 'n_id'
@@ -84,51 +86,10 @@ var f_s_model_name_snake_case = function(s_model_name_camel_case){
     var s_model_name_snake_case = a_s.join("_");
     return s_model_name_camel_case;
 }
-var f_o__casted_to_class = function(
-    o_object,
-    o_class
-){
-    var o_class_instance = new o_class();
-    for(var s_prop_name in o_class_instance){
-        if(!o_object.hasOwnProperty(s_prop_name)){
-            var s_msg = `'${s_prop_name}': property is not set on the object / object must be instance of class ${o_class}`
-            throw s_msg;
-        }else{
-            o_class_instance[s_prop_name] = o_object[s_prop_name]
-        }
-    } 
-    for(var s_prop_name in o_object){
-        if(!o_class_instance.hasOwnProperty(s_prop_name)){
-            var s_msg = `'${s_prop_name}': property is not existing in the class ${o_class} and therefore ignored`
-            throw s_msg;
-        }
-    }
-    return o_class_instance
-}
 
 // crud functions
-
-var f_o_api_request = function(
-    o_request
-){
-    if(o_request instanceof O_api_request){
-        return o_request
-    }
-    var o_api_request = f_o__casted_to_class(
-        o_request,
-        O_api_request
-    );
-    for(var n_index in o_api_request.a_o_crud_operation_request){
-        var o_crud_operation_request = f_o__casted_to_class(
-            o_api_request.a_o_crud_operation_request[n_index],
-            O_crud_operation_request
-        );
-        o_api_request.a_o_crud_operation_request[n_index] = o_crud_operation_request;
-    }
-    return o_api_request;
-}
 let f_o_api_response = async function(
-    o_api_request
+    o
 ){
     var o_api_response = new O_api_response();
     o_api_response.b_success = true;
@@ -137,7 +98,17 @@ let f_o_api_response = async function(
     try{
         var b_echo_json = false; 
         o_api_response.a_o_crud_operation_result = []
-        var o_api_request = f_o_api_request(o_api_request);
+        var o_api_request = f_o__casted_to_class(
+            o,
+            [
+                O_api_response,
+                O_api_request,
+                O_crud_operation_request,
+                O_crud_operation_result
+            ],
+            O_api_request
+        );
+        console.log(o_api_request);
         o_api_response.o_api_request = o_api_request
         for(let o_crud_operation_request of o_api_request.a_o_crud_operation_request){
             let o_crud_operation_result = await f_o_crud_operation_result(o_crud_operation_request);
@@ -186,7 +157,7 @@ let f_o_crud_operation_result = async function(
         o_crud_operation_request.s_crud_operation_name == "update"
     ){
         o_crud_operation_result.a_o_validation_error = f(
-            o_crud_operation_request.o_instance,
+            o_crud_operation_request.o,
             o_crud_operation_request.s_model_name
         );
         f_call_all_o_crud_operation_callback_f_callback(
@@ -319,11 +290,11 @@ let f_a_o_crud_in_db = async function(
         s_table_name = o_crud_operation_request.s_table_name;
     }
     var a_o = await o_mod__db_crud_functions[s_function_name_db_crud_operation](
-        o_crud_operation_request.o_instance, 
+        o_crud_operation_request.o, 
         s_table_name, 
         o_db_client
     );
-
+    // console.log(a_o)
     return a_o;
 }
 
@@ -340,7 +311,6 @@ var o_s_fname_f_function_inside_crud_operation_process = {
 
 export {
     o_s_fname_f_function_inside_crud_operation_process, 
-    f_o__casted_to_class, 
     f_s_model_name_camel_case,
     f_s_model_name_snake_case, 
     f_o_model_related,

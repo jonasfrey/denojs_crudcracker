@@ -233,7 +233,7 @@ let f_a_o_validation_error__o_model_property__datatype = function(
     // var stringObject = new String( "This is a String Object" );
     if(typeof property_value !== typeof o_map[o_model_property.s_type]){
         a_o_validation_error__o_model_property__datatype = new O_validation_error__o_model_property(
-            `'${property_value}': value type is invalid, expected type is ${tihs.s_type}:${typeof[o_map[o_model_property.s_type]]}, actual type is ${typeof value}`,
+            `'${property_value}': value type is invalid, expected type is ${o_model_property.s_type}:${typeof[o_map[o_model_property.s_type]]}, actual type is ${typeof value}`,
             o_model_property.s_name,
             o_model_property, 
             property_value

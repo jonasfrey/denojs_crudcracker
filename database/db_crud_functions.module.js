@@ -4,12 +4,30 @@ import { o_s_table_name_s_id_name } from "./o_s_table_name_s_id_name.module.js";
 import {
     f_o__execute_query__denoxmysql,
     f_o_command__execute_query_terminalcommand
-} from "./db_io.module.js"
+} from "./mod.module.js"
 import { a_o_db_connection_info } from "../database/a_o_db_connection_info.gitignored.module.js";
 
 
 import { Client } from "https://deno.land/x/mysql/mod.ts";
 
+class O_query_data{
+    constructor(o){
+        this.a_s_prop_name = []
+        this.a_value = []
+        console.log(o)
+        for(var s_prop_name in o){
+            var value = o[s_prop_name];
+            if(
+                value == undefined 
+                // || value == null
+                ){
+                continue;
+            }
+            this.a_s_prop_name.push(s_prop_name);
+            this.a_value.push(value)
+        }
+    }
+}
 var f_create = async function(s_model_name, o_model_instance ,o_db_client , o_database = null,){
     var s_table_name = "a_"+s_model_name.toLowerCase();
 
@@ -59,10 +77,12 @@ var f_delete = async function(o_model_instance ,o_db_client , o_database = null)
 }
 
 var f_s_where_statement = function(o_data){
-    return `where ${Object.keys(o_data).map(s => `${s} = '${o_data[s]}'`).join("and")}`;
+    var o_query_data = new O_query_data(o_data);
+    return `where ${o_query_data.a_s_prop_name.map(s => `${s} = '${o_data[s]}'`).join(" and ")}`;
 }
 var f_s_set_statement = function(o_data){
-    return `set ${Object.keys(o_data).map(s => `${s} = '${o_data[s]}'`).join(",")}`;
+    var o_query_data = new O_query_data(o_data);
+    return `set ${o_query_data.a_s_prop_name.map(s => `${s} = '${o_data[s]}'`).join(" , ")}`;
 }
 var o_database__last_used = null;
 
@@ -84,9 +104,9 @@ var f_a_o_create_indb = async function(
     s_table_name,
     o_db_client
 ){
-    var a_s_prop_name = Object.keys(o_data);
-    var a_value = Object.values(o_data);
-    var s_query = `insert into ${s_table_name}(${a_s_prop_name.join(',')}) values(${a_value.map(v => `'${v.toString()}'`).join(',')})`;
+    var o_query_data = new O_query_data(o_data);
+
+    var s_query = `insert into ${s_table_name}(${o_query_data.a_s_prop_name.join(',')}) values(${o_query_data.a_value.map(v => `'${v.toString()}'`).join(',')})`;
     var o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
 
     var s_name_id = o_s_table_name_s_id_name[s_table_name]; 

@@ -5,15 +5,20 @@ var f_o__execute_query__denoxmysql = async function(
     o_db_client,
     o_database = null, 
 ){
+
     // since the library can only run one statement at the time
     var a_s_sql_statement = s_query.split(';');
     a_s_sql_statement = a_s_sql_statement.filter(s => s.trim() != '');
+
+
     // console.log(a_s_sql_statement)
     if(o_database != null){
         var result = await o_db_client.execute(`USE ${o_database.s_name}`);
     }
     for(let s_sql_statement of a_s_sql_statement){
         try {
+            console.log(`f_o__execute_query__denoxmysql: query: ${s_sql_statement}`)
+
             var result = await o_db_client.execute(s_sql_statement);
         } catch (o_e) {
             

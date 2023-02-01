@@ -1,4 +1,4 @@
-import { f_o__execute_query__denoxmysql } from "../database/db_io.module.js";
+import { f_o__execute_query__denoxmysql } from "../database/mod.module.js";
 import { O_model } from "./O_model.module.js"
 import { 
     O_model_property,

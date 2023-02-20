@@ -37,8 +37,8 @@ class O_query_data{
                 ){
                 continue;
             }
-            this.a_s_prop_name.push(escapeSql(s_prop_name));
-            this.a_value.push(escapeSql(value))
+            this.a_s_prop_name.push((s_prop_name));
+            this.a_value.push((value))
         }
     }
 }
@@ -46,11 +46,17 @@ class O_query_data{
 
 var f_s_where_statement = function(o_data){
     var o_query_data = new O_query_data(o_data);
-    return `where ${o_query_data.a_s_prop_name.map(s => `${escapeSql(s)} = ${escapeSql(o_data[s])}`).join(" and ")}`;
+    console.log(o_query_data)
+    var s_sql = `where ${o_query_data.a_s_prop_name.map(s => `${escapeSql(s)} = '${escapeSql(o_query_data.a_value[s])}'`).join(" and ")}`;
+    console.log(s_sql)
+    return s_sql
 }
 var f_s_set_statement = function(o_data){
     var o_query_data = new O_query_data(o_data);
-    return `set ${o_query_data.a_s_prop_name.map(s => `${escapeSql(s)} = ${escapeSql(o_data[s])}`).join(" , ")}`;
+    console.log(o_query_data)
+    var s_sql = `set ${o_query_data.a_s_prop_name.map(s => `${escapeSql(s)} = '${escapeSql(o_query_data.a_value[s])}'`).join(" , ")}`;
+    console.log(s_sql)
+    return s_sql
 }
 var o_database__last_used = null;
 
@@ -77,7 +83,11 @@ var f_a_o_create_indb = async function(
 ){
     var o_query_data = new O_query_data(o_crud_operation_request__params.o);
 
-    var s_query = `insert into ${escapeSql(s_table_name)}(${o_query_data.a_s_prop_name.join(',')}) values(${o_query_data.a_value.map(v => `${escapeSql(v.toString())}`).join(',')})`;
+    var s_query = `
+    insert into ${escapeSql(s_table_name)}
+    (${o_query_data.a_s_prop_name.join(',')})
+    values(${o_query_data.a_value.map(v => `'${escapeSql(v.toString())}'`).join(',')})`;
+    
     var o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
 
     var s_name_id = o_s_table_name_s_id_name[s_table_name]; 

@@ -1,0 +1,1 @@
+insert into a_o_user(n_id,s_name,s_ts_lt__created,s_ts_lt__modified,n_ts_sec_lt__created,n_ts_sec_lt__modified) values('1','hans','02-18-2023 14:51:39','02-18-2023 14:51:39','1676724699261','1676724699261')

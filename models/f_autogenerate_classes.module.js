@@ -53,10 +53,10 @@ ${a_s_model_name.map(
     }
     ).join("\n")}
 var a_o_class = [${a_s_model_name.map(s_model_name=>s_model_name).join(",\n")}];
-var o_o_class = {${a_s_model_name.map(s_model_name=>`${s_model_name}:${s_model_name}`).join(",\n")}};
+var o_s_class_name_o_class = {${a_s_model_name.map(s_model_name=>`${s_model_name}:${s_model_name}`).join(",\n")}};
 export { 
 a_o_class,
-o_o_class,
+o_s_class_name_o_class,
 ${a_s_model_name.map(s_model_name=>s_model_name).join(",\n")}
 }
 `

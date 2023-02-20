@@ -1,5 +1,5 @@
 
-        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Tue Jan 31 2023 11:54:07 GMT+0100 (Central European Standard Time)","n_ts_created":1675162447070}
+        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Sat Feb 18 2023 13:40:30 GMT+0100 (Central European Standard Time)","n_ts_created":1676724030207}
         class O_chatroom{
             constructor(
                n_id,

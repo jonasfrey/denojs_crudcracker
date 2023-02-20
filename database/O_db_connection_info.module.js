@@ -1,4 +1,3 @@
-
 class O_db_connection_info{
     constructor(
         n_id, 
@@ -14,5 +13,4 @@ class O_db_connection_info{
         this.s_password = s_password
     }
 }
-
 export {O_db_connection_info}

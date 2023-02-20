@@ -1,10 +1,18 @@
-import { a_o_database } from "./../database/a_o_database.module.js";
-import { a_o_db_connection_info } from "./../database/a_o_db_connection_info.gitignored.module.js";
+import { 
+    a_o_database,
+    a_o_db_connection_info,
+    f_o__execute_query__denoxmysql,
+    f_o_command__execute_query_terminalcommand
+} from "./../database/mod.module.js";
+
 import { a_o_model } from "./a_o_model.module.js";
 import { f_write_file } from "./f_write_file.module.js"
 import { ensureFile } from "https://deno.land/std@0.170.0/fs/mod.ts";
 import {f_o_command} from "https://deno.land/x/o_command@0.5/O_command.module.js"
+
 import { Client } from "https://deno.land/x/mysql/mod.ts";
+import { log } from "https://deno.land/x/mysql@v2.11.0/mod.ts";
+const { error } = log;
 
 var s_path_file__query_logs = "./query_logs_tmp.gitignored.sql"
 var s_txt_query_logs = "-- "+new Date().toString()+"\n";
@@ -14,10 +22,6 @@ await f_write_file(
     //clear log
     ''
 )
-import {
-    f_o__execute_query__denoxmysql,
-    f_o_command__execute_query_terminalcommand
-} from "../database/mod.module.js"
 
 function f_s_repeated(n, s=' '){
     return new Array(n+1).join(s);
@@ -296,19 +300,19 @@ CREATE TABLE IF NOT EXISTS ${f_s_table_name_from_o_model(o_model)} (
 
     var a_o_model_property__foreign_key = o_model.a_o_model_property.filter(o=> f_b_foreign_key(o));
     for(var o_model_property__foreign_key of a_o_model_property__foreign_key){
-        var a_o_model__foreign = f_a_o_model_from_o_model_property(o_model_property__foreign_key);
-        var o_model__foreign = a_o_model__foreign[0];
         var s_name__model_property_foreign = o_model_property__foreign_key.o_model_property_key.o_model_property__foreign?.s_name;
 
         var s_cascade_on_delete = o_model_property__foreign_key.o_model_property_key?.b_cascade_on_delete;
         var s_cascade_on_update = o_model_property__foreign_key.o_model_property_key?.b_cascade_on_update;
-        if(o_model__foreign && s_name__model_property_foreign){
+        var o_model_property_key = o_model_property__foreign_key.o_model_property_key;
+        // console.log(o_model_property_key);
+        // console.log(o_model_property_key.o_model__foreign);
+        // console.log(o_model_property_key.o_model_property__foreign);
+        // Deno.exit()
+        a_s_table_property.push(
+            `${s_i1}${s_i1}FOREIGN KEY (${o_model_property__foreign_key.s_name}) REFERENCES ${f_s_table_name_from_o_model(o_model_property_key.o_model__foreign)} (${o_model_property_key.o_model_property__foreign.s_name}) ${(s_cascade_on_delete)?'ON DELETE CASCADE': ''} ${(s_cascade_on_update)?'ON UPDATE CASCADE': ''}`
+        );
 
-            a_s_table_property.push(
-                `${s_i1}${s_i1}FOREIGN KEY (${o_model_property__foreign_key.s_name}) REFERENCES ${f_s_table_name_from_o_model(o_model__foreign)} (${s_name__model_property_foreign}) ${(s_cascade_on_delete)?'ON DELETE CASCADE': ''} ${(s_cascade_on_update)?'ON UPDATE CASCADE': ''}`
-            );
-
-        }
     }
     s_query+=a_s_table_property.join(",\n");
     s_query+=`

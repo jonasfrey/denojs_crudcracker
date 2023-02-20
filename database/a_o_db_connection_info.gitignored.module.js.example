@@ -1,4 +1,4 @@
-import { O_db_connection_info } from "./O_db_connection_info.module.js"
+import { O_db_connection_info } from "./mod.module.js"
 
 var a_o_db_connection_info = [
   new O_db_connection_info(
@@ -11,6 +11,5 @@ var a_o_db_connection_info = [
 ]
 
 export {
-  a_o_db_connection_info, 
-  O_db_connection_info
+  a_o_db_connection_info,
 }

@@ -67,11 +67,13 @@ class O_model_property_validation{
 class O_model_property_key{
     constructor(
         b_primary = false,
+        o_model__foreign = null,
         o_model_property__foreign = null,
         b_cascade_on_update = false, 
         b_cascade_on_delete = false,
     ){
         this.b_primary = b_primary
+        this.o_model__foreign = o_model__foreign
         this.o_model_property__foreign = o_model_property__foreign
         this.b_cascade_on_update = b_cascade_on_update
         this.b_cascade_on_delete = b_cascade_on_delete

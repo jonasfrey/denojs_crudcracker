@@ -1,56 +1,37 @@
 import { a_o__testdata } from "./a_o__testdata.module.js";
 
-
-import { f_o__execute_query__denoxmysql } from "../database/mod.module.js";
-
-import { a_o_database } from "../database/a_o_database.module.js";
-
-import { Client } from "https://deno.land/x/mysql/mod.ts";
-
-import { a_o_db_connection_info } from "../database/a_o_db_connection_info.gitignored.module.js";
 import {
-    O_api_request 
-} from "./../models/classes/O_api_request.module.js"
+    O_api_request,
+    O_crud_operation_result,
+    O_crud_operation_request,
+    O_crud_operation_request__params,
+} from "./../models/classes/a_o_class.module.js"
+
 import { 
     f_o_crud_operation_result, 
     f_o_api_response
 } from "./../models/mod.module.js";
 
-import { O_crud_operation_result } from "../models/classes/O_crud_operation_result.module.js";
-import { O_crud_operation_request } from "../models/classes/O_crud_operation_request.module.js";
+import {
+    a_o_db_connection_info, 
+    a_o_database,
+    f_o__execute_query__denoxmysql
+} from "./../database/mod.module.js"
+
 
 var f_create_test_data = async function(){
     for(var o_db_connection_info of a_o_db_connection_info){
         for(var o_database of a_o_database){
             for(var o of a_o__testdata){
-                if(o.n_id == undefined || o.n_id == null){
-                    var o_api_request = new O_api_request(
-                        [
-                            new O_crud_operation_request(
-                                o, 
-                                'create',
-                                o.constructor.name,
-                                o_database.n_id,
-                                o_db_connection_info.n_id, 
-                            )
-                        ]
-                    );
-                    var o_api_response = await f_o_api_response(
-                        o_api_request
-                    );
-    
-                    if(!o_api_response.b_success){
-                        console.log(o_api_response.s_message)
-                        Deno.exit()
-                    }
-                    var a_o = o_api_response.a_o_crud_operation_result[0].a_o_instance_from_db;
-                    console.log(a_o)
-                    continue;
-                }
-                var o_api_request = new O_api_request(
+
+
+                console.log("testing read") 
+                var o_api_request__read = new O_api_request(
                     [
                         new O_crud_operation_request(
-                            {n_id: o.n_id}, 
+                            new O_crud_operation_request__params(
+                                {n_id: o.n_id}, 
+                            ),
                             'read',
                             o.constructor.name,
                             o_database.n_id,
@@ -58,27 +39,89 @@ var f_create_test_data = async function(){
                         )
                     ]
                 );
-                var o_api_response = await f_o_api_response(
-                    o_api_request
+                var o_api_response__read = await f_o_api_response(
+                    o_api_request__read
                 );
-                
-                if(!o_api_response.b_success){
-                    console.log(o_api_response.s_message)
+                if(!o_api_response__read.b_success){
+                    console.log(o_api_response__read)
                     Deno.exit()
                 }
-                var a_o = o_api_response.a_o_crud_operation_result[0].a_o_instance_from_db;
-                
-                if(a_o.length == 0){
-                    o_api_request.a_o_crud_operation_request[0].s_crud_operation_name = 'create';
-                    o_api_request.a_o_crud_operation_request[0].o = o;
-                    var o_api_response = await f_o_api_response(o_api_request);
-                    if(!o_api_response.b_success){
-                        console.log(o_api_response.s_message)
-                        Deno.exit()
-                    }
-                    console.log(o_api_response)
+
+                // testing delete 
+                console.log("testing delete") 
+
+                var o_api_request__delete = new O_api_request(
+                    [
+                        new O_crud_operation_request(
+                            new O_crud_operation_request__params(
+                                {n_id: o.n_id}, 
+                            ),
+                            'delete',
+                            o.constructor.name,
+                            o_database.n_id,
+                            o_db_connection_info.n_id, 
+                        )
+                    ]
+                );
+                var o_api_response__delete = await f_o_api_response(
+                    o_api_request__delete
+                );
+
+
+                //testing create
+                console.log("testing create") 
+                var o_api_request__create = new O_api_request(
+                    [
+                        new O_crud_operation_request(
+                            new O_crud_operation_request__params(
+                                o
+                            ),
+                            'create',
+                            o.constructor.name,
+                            o_database.n_id,
+                            o_db_connection_info.n_id, 
+                        )
+                    ]
+                );
+                var o_api_response__create = await f_o_api_response(
+                    o_api_request__create
+                );
+                if(!o_api_response__create.b_success){
+                    console.log("o_api_response__create")
+                    console.log(o_api_response__create.s_message)
+                    // console.log(o_api_response__create.o_api_request)
+                    console.log(o_api_response__create.a_o_crud_operation_result)
+                    Deno.exit()
                 }
-                console.log(a_o)
+
+
+                //testing update
+                console.log("testing update") 
+                var o_api_request__update = new O_api_request(
+                    [
+                        new O_crud_operation_request(
+                            new O_crud_operation_request__params(
+                                {
+                                    s_name: `this value has been changed from ${o.s_name} to what you're reading now`
+                                },
+                                {n_id: o.n_id}, 
+                            ),
+                            'update',
+                            o.constructor.name,
+                            o_database.n_id,
+                            o_db_connection_info.n_id, 
+                        )
+                    ]
+                );
+                var o_api_response__update = await f_o_api_response(
+                    o_api_request__update
+                );
+                if(!o_api_response__update.b_success){
+                    console.log(o_api_response__update)
+                    Deno.exit()
+                }
+
+
             }
     
         }

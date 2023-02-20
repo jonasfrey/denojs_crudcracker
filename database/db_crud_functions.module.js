@@ -1,12 +1,26 @@
-import { a_o_model } from "../models/a_o_model.module.js";
-import { a_o_database } from "./a_o_database.module.js";
-import { o_s_table_name_s_id_name } from "./o_s_table_name_s_id_name.module.js";
 import {
-    f_o__execute_query__denoxmysql,
-    f_o_command__execute_query_terminalcommand
-} from "./mod.module.js"
-import { a_o_db_connection_info } from "../database/a_o_db_connection_info.gitignored.module.js";
+    a_o_model
+} from "./../models/a_o_model.module.js"
 
+import {
+    O_crud_operation_request,
+    O_crud_operation_request__params,
+} from "./../models/classes/a_o_class.module.js"
+
+
+import { escapeSql } from "https://deno.land/x/escape@1.4.2/mod.ts";
+
+// import {
+//     o
+// } from "./../models/mod.module.js";
+
+import {
+    o_s_table_name_s_id_name, 
+    a_o_database, 
+    f_o__execute_query__denoxmysql,
+    f_o_command__execute_query_terminalcommand, 
+    a_o_db_connection_info
+} from "./../database/mod.module.js"
 
 import { Client } from "https://deno.land/x/mysql/mod.ts";
 
@@ -23,90 +37,47 @@ class O_query_data{
                 ){
                 continue;
             }
-            this.a_s_prop_name.push(s_prop_name);
-            this.a_value.push(value)
+            this.a_s_prop_name.push(escapeSql(s_prop_name));
+            this.a_value.push(escapeSql(value))
         }
     }
 }
-var f_create = async function(s_model_name, o_model_instance ,o_db_client , o_database = null,){
-    var s_table_name = "a_"+s_model_name.toLowerCase();
 
-    if(s_table_name == "object"){
-        console.log(`${o_model_instance}: must by an instance of a model which has to be defined in a_o_model.module.js`)
-        return 1
-    }
-    
-    var o_model = a_o_model.filter(o=> o.s_name == s_model_name)[0];
-    if(!o_model){
-        console.log(`${s_model_name}: o_model does not exist in ${a_o_model}`)
-        return 1
-    }
-
-    // console.log(o_model)
-    var a_s_prop_name = []
-    var a_value = []
-    for(var o_model_property of o_model.a_o_model_property){
-        if(o_model_property.b_auto_increment && o_model_instance[o_model_property.s_name] == 0){
-            continue
-        }
-        if(o_model_instance.hasOwnProperty(o_model_property.s_name)){
-            a_s_prop_name.push(o_model_property.s_name)
-            a_value.push(o_model_instance[o_model_property.s_name])
-        }
-    }
-
-    var s_query = `INSERT INTO ${s_table_name}(${a_s_prop_name.join(',')}) values(${a_value.map(v => `'${v.toString()}'`).join(',')})`;
-    
-    console.log(s_query)
-    console.log(a_value)
-
-    
-    let o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
-
-    return o_result;
-}
-
-var f_read = async function(o_model_instance ,o_db_client , o_database = null){
-    
-}
-var f_update = async function(o_model_instance ,o_db_client , o_database = null){
-    
-}
-var f_delete = async function(o_model_instance ,o_db_client , o_database = null){
-    
-}
 
 var f_s_where_statement = function(o_data){
     var o_query_data = new O_query_data(o_data);
-    return `where ${o_query_data.a_s_prop_name.map(s => `${s} = '${o_data[s]}'`).join(" and ")}`;
+    return `where ${o_query_data.a_s_prop_name.map(s => `${escapeSql(s)} = ${escapeSql(o_data[s])}`).join(" and ")}`;
 }
 var f_s_set_statement = function(o_data){
     var o_query_data = new O_query_data(o_data);
-    return `set ${o_query_data.a_s_prop_name.map(s => `${s} = '${o_data[s]}'`).join(" , ")}`;
+    return `set ${o_query_data.a_s_prop_name.map(s => `${escapeSql(s)} = ${escapeSql(o_data[s])}`).join(" , ")}`;
 }
 var o_database__last_used = null;
 
 var f_a_o_read_indb = async function(
-    o_data,
+    o_crud_operation_request__params,
     s_table_name,
     o_db_client
 ){
     var s_query = `
-        select * from ${s_table_name}
-        ${f_s_where_statement(o_data)}
+        select * from ${escapeSql(s_table_name)}
+        ${f_s_where_statement(o_crud_operation_request__params.o)}
     `;
+    // console.log(o_crud_operation_request__params)
+    
     var o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
     //
+    // console.log(o_result)
     return o_result.rows;
 }
 var f_a_o_create_indb = async function(
-    o_data,
+    o_crud_operation_request__params,
     s_table_name,
     o_db_client
 ){
-    var o_query_data = new O_query_data(o_data);
+    var o_query_data = new O_query_data(o_crud_operation_request__params.o);
 
-    var s_query = `insert into ${s_table_name}(${o_query_data.a_s_prop_name.join(',')}) values(${o_query_data.a_value.map(v => `'${v.toString()}'`).join(',')})`;
+    var s_query = `insert into ${escapeSql(s_table_name)}(${o_query_data.a_s_prop_name.join(',')}) values(${o_query_data.a_value.map(v => `${escapeSql(v.toString())}`).join(',')})`;
     var o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
 
     var s_name_id = o_s_table_name_s_id_name[s_table_name]; 
@@ -114,7 +85,10 @@ var f_a_o_create_indb = async function(
         s_name_id = "n_id"
     }
     var a_o = await f_a_o_read_indb(
-        {[s_name_id]: o_result.lastInsertId},
+        new O_crud_operation_request__params(
+            {[s_name_id]: o_result.lastInsertId},
+            {}, 
+        ),
         s_table_name,
         o_db_client
     )
@@ -125,15 +99,14 @@ var f_a_o_create_indb = async function(
     return a_o;
 }
 var f_a_o_update_indb = async function(
-    o_data,
-    o_data_where,
+    o_crud_operation_request__params,
     s_table_name,
     o_db_client
 ){
     var s_query = `
-    update ${s_table_name}
-    ${f_s_set_statement(o_data)}
-    ${f_s_where_statement(o_data_where)}
+    update ${escapeSql(s_table_name)}
+    ${f_s_set_statement(o_crud_operation_request__params.o)}
+    ${f_s_where_statement(o_crud_operation_request__params.o_where)}
     `;
     var o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
     //
@@ -141,18 +114,20 @@ var f_a_o_update_indb = async function(
 
 }
 var f_a_o_delete_indb = async function(
-    o_data,
+    o_crud_operation_request__params,
     s_table_name, 
     o_db_client
 ){
     var s_query = `
-    delete from ${s_table_name}
-    ${f_s_where_statement(o_data)}
+    delete from ${escapeSql(s_table_name)}
+    ${f_s_where_statement(o_crud_operation_request__params.o)}
     `;
-    var a_o = await f_a_o_read_indb(o_data, s_table_name, o_db_client);
+    // var a_o = await f_a_o_read_indb(o_crud_operation_request__params, s_table_name, o_db_client);
     var o_result = await f_o__execute_query__denoxmysql(s_query, o_db_client);
-    
-    return a_o;
+    // console.log(o_result)
+    // Deno.exit()
+    // return a_o;
+    return []// we do not return the deleted entries on purpos we just return an empty array
 }
 if(Deno.args[0] == "test"){
     var o_db_connection_info = a_o_db_connection_info[0];
@@ -164,18 +139,40 @@ if(Deno.args[0] == "test"){
     });
     var s_table_name = "a_o_user";
     var o_database = a_o_database[0];
-    var o_result = f_o__execute_query__denoxmysql(`use  ${o_database.s_name}`, o_db_client);
+    var o_result = f_o__execute_query__denoxmysql(
+        `use  ${o_database.s_name}`,
+        o_db_client
+    );
     console.log("read");
-    o_result = await f_a_o_read_indb({s_name:"hans"}, s_table_name, o_db_client);
+    o_result = await f_a_o_read_indb(
+        new O_crud_operation_request__params({s_name:"hans"}),
+        s_table_name,
+        o_db_client
+    );
     console.log(o_result);
-    o_result = await f_a_o_read_indb({s_name:"juergen"}, s_table_name, o_db_client);
+    o_result = await f_a_o_read_indb(
+        new O_crud_operation_request__params({s_name:"juergen"}),
+        s_table_name,
+        o_db_client
+    );
     console.log(o_result);
     console.log("create")
-    o_result = await f_a_o_create_indb({s_name:"juergen"}, s_table_name, o_db_client);
+    o_result = await f_a_o_create_indb(
+        new O_crud_operation_request__params({s_name:"juergen"}),
+        s_table_name,
+        o_db_client
+    );
     console.log(o_result);
 
     console.log("update")
-    o_result = await f_a_o_update_indb({s_name:"pikkachu"}, {s_name:"juergen"}, s_table_name, o_db_client);
+    o_result = await f_a_o_update_indb(
+        new O_crud_operation_request__params(
+            {s_name:"pikkachu"},
+            {s_name:"juergen"}
+        ),
+        s_table_name,
+        o_db_client
+        );
     console.log(o_result);
 
     var o_result = await f_o__execute_query__denoxmysql(
@@ -185,21 +182,24 @@ if(Deno.args[0] == "test"){
     console.log(o_result.rows);
 
     console.log("delete")
-    o_result = await f_a_o_delete_indb({s_name:"pikkachu"}, s_table_name, o_db_client);
+    o_result = await f_a_o_delete_indb(
+        new O_crud_operation_request__params({s_name:"pikkachu"}),
+        s_table_name,
+        o_db_client
+    );
     console.log(o_result);
 
-    o_result = await f_a_o_delete_indb({s_name:"pikkachu"}, s_table_name, o_db_client);
+    o_result = await f_a_o_delete_indb(
+        new O_crud_operation_request__params({s_name:"pikkachu"}),
+        s_table_name,
+        o_db_client
+    );
     console.log(o_result);
-
 
     o_db_client.close();
 
 }
 export {
-    f_create, 
-    f_read, 
-    f_update, 
-    f_delete, 
     f_a_o_read_indb,
     f_a_o_create_indb,
     f_a_o_update_indb,

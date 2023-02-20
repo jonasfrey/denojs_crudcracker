@@ -56,6 +56,7 @@ var f_o_model_property__foreign_key = function(o_model){
         false, 
         new O_model_property_key(
             false, 
+            o_model,
             o_model.a_o_model_property.filter(
                 o=>o.s_name == o_model_property__n_id_default_id.s_name
             )[0],

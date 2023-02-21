@@ -20,7 +20,7 @@ import {
 
 import { Client } from "https://deno.land/x/mysql/mod.ts";
 
-import {f_o__casted_to_class} from "https://deno.land/x/f_o__casted_to_class@0.6/f_o__casted_to_class.module.js"
+import {f_o__casted_to_class} from "https://deno.land/x/f_o__casted_to_class@0.7/f_o__casted_to_class.module.js"
 import { O_crud_operation_request__params } from "./classes/O_crud_operation_request__params.module.js";
 import {
     f_a_o_missing_prop,
@@ -97,17 +97,32 @@ var f_s_model_name_snake_case = function(s_model_name_camel_case){
     return s_model_name_camel_case;
 }
 
+let f_b_is_js_object = function(v){
+    return typeof v === 'object' && v !== null
+}
+
 // crud functions
 let f_o_api_response = async function(
     o
 ){
+
     var o_api_response = new O_api_response();
     o_api_response.b_success = true;
     
+    if(!f_b_is_js_object(o)){
+        
+        o_api_response.s_message = `'${o}': bad value, the value/request body must be an instance of the class 'O_api_request'`
+        o_api_response.b_success = false;
+        return o_api_response
+
+    }
+
     var a_s_msg_error = [];
     try{
         var b_echo_json = false; 
         o_api_response.a_o_crud_operation_result = []
+        // console.log("--o")
+        // console.log(o)
         var o_api_request__casted = f_o__casted_to_class(
             o,
             [
@@ -119,18 +134,49 @@ let f_o_api_response = async function(
             ],
             O_api_request
         );
+        // console.log(o_api_request__casted);
+        // Deno.exit()
         var a_o_missing_prop = f_a_o_missing_prop__recursive_in_first_arg_object(
             o,
             o_api_request__casted,
         );
+
         if(a_o_missing_prop.length > 0){
-            o_api_response.s_message = `the request body must be an instance of the class 'O_api_request', the following properties are missing ${JSON.stringify(a_o_missing_prop)}`
+            o_api_response.s_message = `the request body must be an instance of the class 'O_api_request', the following properties are missing
+            ${JSON.stringify(a_o_missing_prop, null, 4)}`
             o_api_response.b_success = false;
             return o_api_response
         }
+
         var o_api_request = o_api_request__casted
 
         for(let o_crud_operation_request of o_api_request.a_o_crud_operation_request){
+
+            var a_s_prop_name__o = Object.keys(o_crud_operation_request.o_crud_operation_request__params.o);
+            
+            if(a_s_prop_name__o.length == 0){
+                o_api_response.s_message = `
+                o_crud_operation_request.o_crud_operation_request__params.o must at least have one property
+                `
+                o_api_response.b_success = false;
+                return o_api_response
+            }
+
+            if(
+                o_crud_operation_request.s_crud_operation_name == "update"
+            ){
+                var a_s_prop_name__o_where = Object.keys(o_crud_operation_request.o_crud_operation_request__params?.o_where);
+                if(a_s_prop_name__o_where.length == 0){
+
+                    console.log("asdf++asdf")
+                    o_api_response.s_message = `
+                    o_crud_operation_request.o_crud_operation_request__params.o_where must at least have one property
+                    `
+                    o_api_response.b_success = false;
+                    return o_api_response
+                }
+            }
+
             let o_crud_operation_result = await f_o_crud_operation_result(o_crud_operation_request);
             if(o_crud_operation_result.a_o_validation_error.length != 0){
                 o_api_response.b_success = false; 
@@ -288,6 +334,7 @@ let f_a_o_crud_in_db = async function(
     if(o_crud_operation_request.s_table_name){
         s_table_name = o_crud_operation_request.s_table_name;
     }
+
     var a_o = await o_mod__db_crud_functions[s_function_name_db_crud_operation](
         o_crud_operation_request.o_crud_operation_request__params,
         s_table_name, 

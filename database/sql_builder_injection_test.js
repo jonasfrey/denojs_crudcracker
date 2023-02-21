@@ -41,6 +41,11 @@ console.log(sql)
 import { escape, escapeId, format } from "https://deno.land/x/sail_sqlstring@v1.0.0/mod.ts";
 import { escapeSql } from "https://deno.land/x/escape/mod.ts";
 
+import { 
+  escape as f_v_escaped_for_sql,
+  escapeId as f_v_escaped_for_sql_id
+} from "https://deno.land/x/sail_sqlstring@v1.0.0/mod.ts";
+
 var userId = "1' 'OR 1=1";
 // var userId = "1";
 var sql = `select * from user where id = ${ escape(userId) }`;
@@ -55,3 +60,6 @@ console.log(escapeSql("test asdfg"))
 console.log(escape(2))
 console.log(escapeSql(2))
 
+
+console.log("f_v_escaped_for_sql(undefined)")
+console.log(f_v_escaped_for_sql(undefined))

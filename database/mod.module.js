@@ -44,7 +44,7 @@ var f_o__execute_query__denoxmysql = async function(
             // const result = await pool.query(s_sql_statement);
             // //console.log(result[0]); // [ { "1": 1 } ]
             // await pool.end();
-            console.log(`f_o__execute_query__denoxmysql: trying query: ${s_sql_statement}`)
+            // console.log(`f_o__execute_query__denoxmysql: trying query: ${s_sql_statement}`)
             var result = await o_db_client.execute(s_sql_statement);
         } catch (o_e) {
             console.log(`${s_sql_statement}: there occured an error when executing the query, check if the username/password/host/port are correct, some libraries do not correctly throw an error when trying to connect to the db!`)

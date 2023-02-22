@@ -30,7 +30,8 @@ import {
     a_o_db_connection_info
 } from "./../database/mod.module.js"
 
-import { Client } from "https://deno.land/x/mysql/mod.ts";
+import { Client, configLogger } from "https://deno.land/x/mysql/mod.ts";
+await configLogger({ enable: false });
 
 class O_query_data{
     constructor(o){
@@ -182,7 +183,11 @@ ${f_s_where_statement(o_crud_operation_request__params.o)}
     return []// we do not return the deleted entries on purpos we just return an empty array
 }
 
-if(Deno.args[0] == "test"){
+if(
+    Deno.args[0] == "test"
+    &&
+    import.meta.main
+){
     var o_db_connection_info = a_o_db_connection_info[0];
     var o_db_client = await new Client().connect({
         hostname: o_db_connection_info.s_hostname, 

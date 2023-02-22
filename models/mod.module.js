@@ -25,7 +25,7 @@ import { O_crud_operation_request__params } from "./classes/O_crud_operation_req
 import {
     f_a_o_missing_prop,
     f_a_o_missing_prop__recursive_in_first_arg_object
-} from "https://deno.land/x/f_a_o_missing_prop@0.9/f_a_o_missing_prop.module.js"
+} from "https://deno.land/x/f_a_o_missing_prop@1.1/f_a_o_missing_prop.module.js"
 
 var f_o_model_related = function(s_prop_name){
     // n_o_finger_n_id -> 'n_', 'o_finger_', 'n_id'

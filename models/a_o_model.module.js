@@ -7,7 +7,7 @@ import {
 } from "./O_model_property.module.js"
 
 
-console.log("note: re-naming of o_model_property is not possible automatically, if you want to rename a table column you have to rename it manually via sql by using a sql query similar to: `ALTER TABLE table_name RENAME COLUMN old_name TO new_name;`")
+// "note: re-naming of o_model_property is not possible automatically, if you want to rename a table column you have to rename it manually via sql by using a sql query similar to: `ALTER TABLE table_name RENAME COLUMN old_name TO new_name
 
 var f_o__cloned = function(o){
     return Object.assign(Object.create(Object.getPrototypeOf(o)), o);

@@ -1,5 +1,5 @@
 
-import {a_o_model} from "./a_o_model.module.js";
+import {a_o_model} from "./model_classes/a_o_model.module.js";
 import { o_s_crud_operation_callback_name_f } from "./o_s_crud_operation_callback_name_f.module.js";
 import {f_a_o_validation_error__o_model} from "./validaton.module.js";
 import { O_api_response } from "./classes/O_api_response.module.js";
@@ -10,6 +10,13 @@ import { O_crud_operation_result } from "./classes/O_crud_operation_result.modul
 import 
     * as o_mod__db_crud_functions
     from "../database/db_crud_functions.module.js"
+import 
+{
+    f_a_o_read_indb,
+    f_a_o_create_indb,
+    f_a_o_update_indb,
+    f_a_o_delete_indb, 
+} from "../database/db_crud_functions.module.js"
 
 import {
     a_o_db_connection_info, 
@@ -21,7 +28,6 @@ import {
 import { Client } from "https://deno.land/x/mysql/mod.ts";
 
 import {f_o__casted_to_class} from "https://deno.land/x/f_o__casted_to_class@0.7/f_o__casted_to_class.module.js"
-import { O_crud_operation_request__params } from "./classes/O_crud_operation_request__params.module.js";
 import {
     f_a_o_missing_prop,
     f_a_o_missing_prop__recursive_in_first_arg_object
@@ -100,7 +106,43 @@ var f_s_model_name_snake_case = function(s_model_name_camel_case){
 let f_b_is_js_object = function(v){
     return typeof v === 'object' && v !== null
 }
+let f_b_request_object_matches_type = function(
+    o,
+    
+){
+    if(!f_b_is_js_object(o)){
+        return false
+    }
 
+    var o_api_request__casted = f_o__casted_to_class(
+        o,
+        [
+            O_api_response,
+            O_api_request,
+            O_crud_operation_request,
+            O_crud_operation_result
+        ],
+        O_api_request
+    );
+
+    var a_o_missing_prop = f_a_o_missing_prop__recursive_in_first_arg_object(
+        o,
+        o_api_request__casted,
+    );
+
+    if(a_o_missing_prop.length > 0){
+        o_api_response.s_message = `the request body must be an instance of the class 'O_api_request', the following properties are missing
+        ${JSON.stringify(a_o_missing_prop, null, 4)}`
+        o_api_response.b_success = false;
+        return o_api_response
+    }
+    
+
+    var o_api_request = o_api_request__casted
+
+    return true;
+    
+}
 // crud functions
 let f_o_api_response = async function(
     o
@@ -117,65 +159,59 @@ let f_o_api_response = async function(
 
     }
 
+    var o_api_request__casted = f_o__casted_to_class(
+        o,
+        [
+            O_api_response,
+            O_api_request,
+            O_crud_operation_request,
+            O_crud_operation_result
+        ],
+        O_api_request
+    );
+    var a_o_missing_prop = f_a_o_missing_prop__recursive_in_first_arg_object(
+        o,
+        o_api_request__casted,
+    );
+    if(a_o_missing_prop.length > 0){
+        o_api_response.s_message = `the request body must be an instance of the class 'O_api_request', the following properties are missing
+        ${JSON.stringify(a_o_missing_prop, null, 4)}`
+        o_api_response.b_success = false;
+        return o_api_response
+    }
+    var o_api_request = o_api_request__casted
+
     var a_s_msg_error = [];
     try{
         var b_echo_json = false; 
         o_api_response.a_o_crud_operation_result = []
-        // console.log("--o")
-        // console.log(o)
-        var o_api_request__casted = f_o__casted_to_class(
-            o,
-            [
-                O_api_response,
-                O_api_request,
-                O_crud_operation_request,
-                O_crud_operation_request__params,
-                O_crud_operation_result
-            ],
-            O_api_request
-        );
-        // console.log(o_api_request__casted);
-        // Deno.exit()
-        var a_o_missing_prop = f_a_o_missing_prop__recursive_in_first_arg_object(
-            o,
-            o_api_request__casted,
-        );
-
-        if(a_o_missing_prop.length > 0){
-            o_api_response.s_message = `the request body must be an instance of the class 'O_api_request', the following properties are missing
-            ${JSON.stringify(a_o_missing_prop, null, 4)}`
-            o_api_response.b_success = false;
-            return o_api_response
-        }
-
-        var o_api_request = o_api_request__casted
-
+        console.log(o_api_request)
+    
         for(let o_crud_operation_request of o_api_request.a_o_crud_operation_request){
 
-            var a_s_prop_name__o = Object.keys(o_crud_operation_request.o_crud_operation_request__params.o);
+
+            //check if enough data is present to make the crud operation
             
-            if(a_s_prop_name__o.length == 0){
-                o_api_response.s_message = `
-                o_crud_operation_request.o_crud_operation_request__params.o must at least have one property
-                `
-                o_api_response.b_success = false;
-                return o_api_response
-            }
-
-            if(
-                o_crud_operation_request.s_crud_operation_name == "update"
-            ){
-                var a_s_prop_name__o_where = Object.keys(o_crud_operation_request.o_crud_operation_request__params?.o_where);
-                if(a_s_prop_name__o_where.length == 0){
-
-                    console.log("asdf++asdf")
-                    o_api_response.s_message = `
-                    o_crud_operation_request.o_crud_operation_request__params.o_where must at least have one property
-                    `
+            if(['create', 'update'].includes(o_crud_operation_request.s_crud_operation_name.toLowerCase())){
+                var a_s_prop_name__o_data_for_update_or_create = Object.keys(o_crud_operation_request.o_data_for_update_or_create);
+                if(a_s_prop_name__o_data_for_update_or_create.length == 0){
+                    o_api_response.s_message = `o_crud_operation_request.o_data_for_update_or_create must at least have one property`
                     o_api_response.b_success = false;
                     return o_api_response
                 }
             }
+            if(o_crud_operation_request.s_crud_operation_name.toLowerCase() != "create"){                
+                if(
+                    o_crud_operation_request.a_search_conditions_multidimensional_for_read_or_update_or_delete.length < 3
+                    || 
+                    !Array.isArray(o_crud_operation_request.a_search_conditions_multidimensional_for_read_or_update_or_delete)
+                    ){
+                    o_api_response.s_message = `o_crud_operation_request.a_search_conditions_multidimensional_for_read_or_update_or_delete must at least have 3 props for example ['s_name','like', '%hans%']`
+                    o_api_response.b_success = false;
+                    return o_api_response
+                }
+            }
+
 
             let o_crud_operation_result = await f_o_crud_operation_result(o_crud_operation_request);
             if(o_crud_operation_result.a_o_validation_error.length != 0){
@@ -328,18 +364,39 @@ let f_a_o_crud_in_db = async function(
         await f_o__execute_query__denoxmysql(s_query, o_db_client);
         o_used_db_per_client.o_database = o_database;
     // }
-
-    var s_function_name_db_crud_operation = `f_a_o_${o_crud_operation_request.s_crud_operation_name}_indb` 
-    let s_table_name = `a_${o_crud_operation_request.s_model_name.toLowerCase()}`
+    var s_table_name = `a_${o_crud_operation_request.s_model_name}`;
     if(o_crud_operation_request.s_table_name){
         s_table_name = o_crud_operation_request.s_table_name;
     }
+    if(o_crud_operation_request.s_crud_operation_name == "create"){
+        var a_o = await f_a_o_create_indb(
+            o_crud_operation_request.o_data,
+            s_table_name, 
+            o_db_client
+        )
+    }
+    if(o_crud_operation_request.s_crud_operation_name == "read"){
+        var a_o = await f_a_o_read_indb(
+            o_crud_operation_request.o_data,
+            s_table_name, 
+            o_db_client
+        )
+    }
+    if(o_crud_operation_request.s_crud_operation_name == "update"){
+        var a_o = await f_a_o_update_indb(
+            o_crud_operation_request.o_data,
+            s_table_name, 
+            o_db_client
+        )
+    }
+    if(o_crud_operation_request.s_crud_operation_name == "delete"){
+        var a_o = await f_a_o_delete_indb(
+            o_crud_operation_request.o_data,
+            s_table_name, 
+            o_db_client
+        )
+    }
 
-    var a_o = await o_mod__db_crud_functions[s_function_name_db_crud_operation](
-        o_crud_operation_request.o_crud_operation_request__params,
-        s_table_name, 
-        o_db_client
-    );
 
     // console.log(s_function_name_db_crud_operation)
     // console.log(a_o)

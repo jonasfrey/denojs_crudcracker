@@ -1,5 +1,5 @@
 
-        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Tue Feb 21 2023 14:38:14 GMT+0100 (Central European Standard Time)","n_ts_created":1676986694191}
+        // {"s_msg":"this file was automatically generated","s_by":"f_autogenerate_classes.module.js","s_ts_created":"Thu Feb 23 2023 16:39:16 GMT+0100 (Central European Standard Time)","n_ts_created":1677166756799}
         class O_message{
             constructor(
                n_id,

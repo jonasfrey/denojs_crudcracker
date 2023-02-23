@@ -1,11 +1,9 @@
-import { f_o__execute_query__denoxmysql } from "../database/mod.module.js";
 import { O_model } from "./O_model.module.js"
 import { 
     O_model_property,
     O_model_property_key, 
     o_s_type
 } from "./O_model_property.module.js"
-
 
 // "note: re-naming of o_model_property is not possible automatically, if you want to rename a table column you have to rename it manually via sql by using a sql query similar to: `ALTER TABLE table_name RENAME COLUMN old_name TO new_name
 

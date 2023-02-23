@@ -5,7 +5,7 @@ import {
     f_o_command__execute_query_terminalcommand
 } from "./../database/mod.module.js";
 
-import { a_o_model } from "./a_o_model.module.js";
+import { a_o_model } from "./model_classes/a_o_model.module.js";
 import { f_write_file } from "./f_write_file.module.js"
 import { ensureFile } from "https://deno.land/std@0.170.0/fs/mod.ts";
 import {f_o_command} from "https://deno.land/x/o_command@0.5/O_command.module.js"

@@ -1,0 +1,1 @@
+/home/legion5pro/code/denojs_f_o_html_from_o_js/f_o_html_from_o_js.module.js

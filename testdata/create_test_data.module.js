@@ -4,7 +4,6 @@ import {
     O_api_request,
     O_crud_operation_result,
     O_crud_operation_request,
-    O_crud_operation_request__params,
 } from "./../models/classes/a_o_class.module.js"
 
 import { 
@@ -43,9 +42,8 @@ var f_create_test_data = async function(){
                     var o_api_request = new O_api_request(
                         [
                             new O_crud_operation_request(
-                                new O_crud_operation_request__params(
-                                    o,
-                                ),
+                                o,
+                                null,
                                 'create',
                                 o.constructor.name,
                                 o_database.n_id,
@@ -63,9 +61,10 @@ var f_create_test_data = async function(){
                     var o_api_request = new O_api_request(
                         [
                             new O_crud_operation_request(
-                                new O_crud_operation_request__params(
-                                    {n_id: o.n_id}
-                                ),
+                                null,
+                                [
+                                    "n_id", "=", o.n_id
+                                ],
                                 'read',
                                 o.constructor.name,
                                 o_database.n_id,
@@ -76,13 +75,14 @@ var f_create_test_data = async function(){
                     var o_api_response = await f_o_api_response(
                         o_api_request
                     );
+                    console.log(o_api_response);
+                    Deno.exit()
                     if(o_api_response.a_o_crud_operation_result[0].a_o_instance_from_db.length == 0){
                         var o_api_request = new O_api_request(
                             [
                                 new O_crud_operation_request(
-                                    new O_crud_operation_request__params(
-                                        o,
-                                    ),
+                                    o,
+                                    null,
                                     'create',
                                     o.constructor.name,
                                     o_database.n_id,

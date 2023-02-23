@@ -1,7 +1,7 @@
 import {f_o_command} from "https://deno.land/x/o_command@0.5/O_command.module.js"
 import * as mysql2 from "https://deno.land/x/mysql2/mod.ts";
 import { escapeSql } from "https://deno.land/x/escape@1.4.2/mod.ts";
-
+import { f_s_where_query_from_array } from "./f_s_where_query_from_array.module.js";
 var f_o__execute_one_query_escaped__denoxmysql = async function(
     s_query, 
     o_db_client,
@@ -125,5 +125,6 @@ export {
     a_o_database,
     a_o_db_connection_info, 
     O_db_connection_info,
-    o_s_table_name_s_id_name
+    o_s_table_name_s_id_name, 
+    f_s_where_query_from_array
 }

@@ -1,4 +1,4 @@
-import {a_o_model} from "./a_o_model.module.js"
+import {a_o_model} from "./model_classes/a_o_model.module.js"
 import {O_validation_error__o_model} from "./classes/O_validation_error__o_model.module.js";
 import {O_validation_error__o_model_property} from "./classes/O_validation_error__o_model_property.module.js";
 

@@ -17,6 +17,7 @@ let f_http_request_handler = async function(
           var o_api_response = await f_o_api_response(o_request_data);
           
         }
+
         // if(o_request_event)
         return o_request_event.respondWith(
             new Response(

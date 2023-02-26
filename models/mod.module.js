@@ -185,8 +185,8 @@ let f_o_api_response = async function(
     try{
         var b_echo_json = false; 
         o_api_response.a_o_crud_operation_result = []
-        console.log(o_api_request)
-    
+        // console.log(o_api_request)
+
         for(let o_crud_operation_request of o_api_request.a_o_crud_operation_request){
 
 
@@ -221,11 +221,15 @@ let f_o_api_response = async function(
             o_api_response.a_o_crud_operation_result.push(
                 o_crud_operation_result
             );
+
         }
     }catch(e){
         o_api_response.b_success = false;
         a_s_msg_error.push(e.message)
         console.log(e.stack)
+        console.log("error:")
+        console.log(e)
+        // console.log(o_crud_operation_result)
         // a_s_msg_error.push(e.stack.toString())
     }
     o_api_response.s_message = a_s_msg_error.join("\n,");
@@ -238,7 +242,7 @@ let f_o_api_response = async function(
 let f_o_crud_operation_result = async function(
     o_crud_operation_request,
 ){
-    let s_model_name_camel_case = f_s_model_name_camel_case(o_crud_operation_request.s_model_name);
+
     var o_crud_operation_result = new O_crud_operation_result()
     o_crud_operation_result.a_o_validation_error = []
     o_crud_operation_result.a_o_instance_from_db = []
@@ -256,7 +260,7 @@ let f_o_crud_operation_result = async function(
             o_crud_operation_result
         )
         o_crud_operation_result.a_o_validation_error = f(
-            o_crud_operation_request.o_crud_operation_request__params.o,
+            o_crud_operation_request.o_data_for_update_or_create,
             o_crud_operation_request.s_model_name
         );
 
@@ -364,39 +368,41 @@ let f_a_o_crud_in_db = async function(
         await f_o__execute_query__denoxmysql(s_query, o_db_client);
         o_used_db_per_client.o_database = o_database;
     // }
-    var s_table_name = `a_${o_crud_operation_request.s_model_name}`;
+    var s_table_name = `a_${o_crud_operation_request.s_model_name.toLowerCase()}`;
     if(o_crud_operation_request.s_table_name){
         s_table_name = o_crud_operation_request.s_table_name;
     }
+
+
     if(o_crud_operation_request.s_crud_operation_name == "create"){
         var a_o = await f_a_o_create_indb(
-            o_crud_operation_request.o_data,
-            s_table_name, 
-            o_db_client
+            o_crud_operation_request.o_data_for_update_or_create,// o_data,
+            s_table_name, // s_table_name,
+            o_db_client// o_db_client
         )
     }
     if(o_crud_operation_request.s_crud_operation_name == "read"){
         var a_o = await f_a_o_read_indb(
-            o_crud_operation_request.o_data,
-            s_table_name, 
-            o_db_client
+            o_crud_operation_request.a_search_conditions_multidimensional_for_read_or_update_or_delete,// a_search_conditions_multidimensional,
+            s_table_name,// s_table_name,
+            o_db_client,// o_db_client
         )
     }
     if(o_crud_operation_request.s_crud_operation_name == "update"){
         var a_o = await f_a_o_update_indb(
-            o_crud_operation_request.o_data,
-            s_table_name, 
-            o_db_client
+            o_crud_operation_request.o_data_for_update_or_create,// o_data, 
+            o_crud_operation_request.a_search_conditions_multidimensional_for_read_or_update_or_delete,// a_search_conditions_multidimensional,
+            s_table_name,// s_table_name,
+            o_db_client// o_db_client
         )
     }
     if(o_crud_operation_request.s_crud_operation_name == "delete"){
         var a_o = await f_a_o_delete_indb(
-            o_crud_operation_request.o_data,
-            s_table_name, 
-            o_db_client
+            o_crud_operation_request.a_search_conditions_multidimensional_for_read_or_update_or_delete,// a_search_conditions_multidimensional,
+            s_table_name, // s_table_name, 
+            o_db_client// o_db_client
         )
     }
-
 
     // console.log(s_function_name_db_crud_operation)
     // console.log(a_o)

@@ -23,7 +23,7 @@ let f_a_o_validation_error__o_model = function(
         ))
         return a_o_validation_error__o_model
     }
-
+    
     if(typeof o_value != 'object'){
         a_o_validation_error__o_model.push(new O_validation_error__o_model(
             `${o_value}: must be of type object`,

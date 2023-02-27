@@ -95,6 +95,7 @@ window.f_a_o_model_instance__read = async function(
 window.o_data = {
     o_model: null,
     a_o_model: a_o_model,
+    o_model_class: null, 
     a_o_class:[
         o_s_class_name_o_class.O_user,
         o_s_class_name_o_class.O_chatroom,
@@ -180,6 +181,10 @@ input, label, textarea{
     color: #D63301;
     background-color: #FFCCBA;
     background-image: url('https://i.imgur.com/GnyDvKN.png');
+}
+.selected{
+    color: #00529B;
+    background-color: #BDE5F8;
 }
 `;
 document.head.appendChild(o_style);
@@ -285,6 +290,8 @@ var o_js_o_api_response = {
         }
     }
 }
+
+
 window.o_js_a_o_model_instance__new = {
     a_o:[
         {
@@ -313,16 +320,113 @@ window.o_js_a_o_model_instance__new = {
                                             s_tag: "label", 
                                             innerText: o_model_property.s_name
                                         },
-                                        {
-                                            class: "o_model_property",
-                                            s_tag: 'input', 
-                                            // readOnly: true,
-                                            // innerHTML: f_s_html_highlighted(value, s_searchterm),
-                                            // innerHTML: f_s_html_highlighted(o.s_string1, s_searchterm)
-                                            oninput: function(){
+                                        (function(){
+                                            var f_oninput_onchange = function(){
                                                 o_data.o_model_instance__new[o_model_property.s_name] = this.value;
                                             }
-                                        },
+                                            var o_model_foreign = o_model_property?.o_model_property_key?.o_model__foreign;
+                                            if(o_model_foreign){
+                                                var a_o_model_instance__foreign = o_data[`a_${o_model_foreign.s_name.toLowerCase()}`];
+
+                                                // return {
+                                                //     s_tag: 'select', 
+                                                //     onchange: f_oninput_onchange, 
+                                                //     a_o:[
+                                                //         ...a_o_model_instance__foreign.map(function(
+                                                //             o_model_instance__foreign
+                                                //         ){
+                                                //             return {
+                                                //                 s_tag: "option", 
+                                                //                 value: o_model_instance__foreign.n_id,
+                                                //                 innerText: JSON.stringify(o_model_instance__foreign)
+                                                //             }
+                                                //         })
+                                                //     ]
+                                                // }
+                                                var s_searchterm = '';
+                                                var o_model_instance__foreign_selected = null;
+                                                var o_js_o_input_and_searchterm = null;
+                                                var o_js_a_o_object = {
+                                                    f_o_js: function(){
+                                                        return {
+                                                            a_o: [
+                                                                ...a_o_model_instance__foreign
+                                                                .filter(function(o){
+                                                                    var a_value = Object.values(o);
+                                                                    return JSON.stringify(o).includes(s_searchterm)
+                                                                })
+                                                                .map(function(
+                                                                    o_model_instance__foreign
+                                                                ){
+                                                                    return {
+                                                                        class: (function(){
+                                                                            var b = o_model_instance__foreign_selected == o_model_instance__foreign;
+                                                                            console.log(b);
+                                                                            if(b){
+                                                                                return 'selected'
+                                                                            }
+                                                                            return 'not_selected'
+                                                                        })(),
+                                                                        value: o_model_instance__foreign.n_id,
+                                                                        innerHTML: f_s_html_highlighted(
+                                                                            JSON.stringify(o_model_instance__foreign),
+                                                                            s_searchterm
+                                                                        ), 
+                                                                        onclick: function(){
+                                                                            console.log(o_model_instance__foreign)
+                                                                            o_model_instance__foreign_selected = o_model_instance__foreign;
+                                                                            o_data.o_model_instance__new[o_model_property.s_name] = o_model_instance__foreign.n_id;
+                                                                            o_js_a_o_object._f_render()
+                                                                            o_js_o_input_and_searchterm._f_render()
+                                                                        }
+                                                                    }
+                                                                })
+                                                            ]
+                                                        }
+
+                                                    }
+                                                }
+                                                o_js_o_input_and_searchterm = {
+                                                    f_o_js:function(){
+                                                        return {
+                                                            class: "custom_select",
+                                                            a_o: [
+                                                                {
+                                                                    s_tag: 'input', 
+                                                                    value: o_model_instance__foreign_selected?.n_id,
+                                                                    onkeyup: f_oninput_onchange 
+                                                                },
+                                                                {
+                                                                    s_tag: 'input', 
+                                                                    value: s_searchterm,
+                                                                    onkeyup: function(){
+                                                                        s_searchterm = this.value
+                                                                        console.log(s_searchterm)
+                                                                        o_js_a_o_object._f_render()
+                                                                    }
+                                                                },
+                                                                o_js_a_o_object
+                                                            ], 
+                                                        }
+                                                    }
+                                                }
+                                                return o_js_o_input_and_searchterm;
+                                            }
+                                            return {
+                                                class: "o_model_property",
+                                                s_tag: 'input',
+                                                value: (function(){
+                                                    if(o_model_property.s_name == "n_id"){
+                                                        return o_data.o_model_instance__new.n_id
+                                                    }
+                                                    return ''
+                                                })(),
+                                                // readOnly: true,
+                                                // innerHTML: f_s_html_highlighted(value, s_searchterm),
+                                                // innerHTML: f_s_html_highlighted(o.s_string1, s_searchterm)
+                                                oninput: f_oninput_onchange
+                                            }
+                                        })()
                                     ]
                             }
                             
@@ -342,6 +446,9 @@ window.o_js_a_o_model_instance__new = {
                 )
                 if(o_data.o_api_response.b_success){
                     o_data.a_o_model_instance.push(o_data.o_api_response.a_o_crud_operation_result[0].a_o_instance_from_db[0]);
+                    o_data.o_model_instance__new = new o_data.o_model_class();
+                    o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
+                    o_js_a_o_model_instance__new._f_render();
                 }
                 console.log("f_render call")
                 o_js_a_o_model_instance._f_render();
@@ -379,7 +486,9 @@ var o = {
                                 // console.log(o_data.a_o_model_instance)
                                 // console.log(this)
                                 o_js_a_o_model_instance._f_render();
-                                o_data.o_model_instance__new = new o_s_class_name_o_class[s_o_model_s_name]();
+                                o_data.o_model_class = o_s_class_name_o_class[s_o_model_s_name]
+                                o_data.o_model_instance__new = new o_data.o_model_class();
+                                o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
                                 o_js_a_o_model_instance__new._f_render();
                                 console.log("test")
                             }
@@ -402,6 +511,7 @@ var o = {
                 s_searchterm = this.value;
                 o_js_a_o_model_instance._f_render()
                 o_data.o_model_instance__new = new o_s_class_name_o_class[s_o_model_s_name]();
+                o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
                 o_js_a_o_model_instance__new._f_render();
             }
         },

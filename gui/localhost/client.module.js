@@ -208,6 +208,12 @@ div#main {
 .boolean { color: blue; }
 .null { color: magenta; }
 .key { color: red; }
+.hoverable:hover{
+    background: rgba(0,0,0,0.2) !important;
+}
+div#main {
+    padding: 1rem;
+}
 `;
 document.head.appendChild(o_style);
 
@@ -236,6 +242,10 @@ var f_s_html_highlighted = function(
     s_string_to_highlight, 
     s_searchterm
 ){
+    
+    if(s_string_to_highlight == null){
+        return null;
+    }
 
     var s_html = s_string_to_highlight.toString();
     if(s_searchterm.trim() != ""){
@@ -282,7 +292,9 @@ window.o_js_a_o_model_instance = {
 
                     // console.log(o_model_instance)
                     return {
-                        class: "o_model_instance",
+                        class: "o_model_instance hoverable",
+                        s_tag: 'article',
+                        'data-tooltip': 'Click to edit this object!',
                         onclick: function(){
                             console.log(o_model_instance)
                             for(let s_prop_name in o_data.o_model_instance__new){
@@ -324,8 +336,35 @@ window.o_js_a_o_model_instance = {
 
                                 
                             }),
-
-                        ]
+                            {
+                                s_tag: "button", 
+                                innerText: 'delete', 
+                                onclick: async function(){
+                                    this.setAttribute('aria-busy', true);
+                                    let s_crud_operation_name = 'delete';
+                                    var o_model_instance_existing = o_model_instance;
+                                    let a_search_conditions_multidimensional_for_read_or_update_or_delete = [
+                                        'n_id',  '=', o_model_instance_existing.n_id,
+                                    ];
+            
+                                    o_data.o_api_response = await f_o_api_response(
+                                        o_data.o_model_instance__new,//o_data,
+                                        a_search_conditions_multidimensional_for_read_or_update_or_delete,//a_search_conditions_multidimensional_for_read_or_update_or_delete,
+                                        o_data.o_model.s_name,//s_o_model_s_name, 
+                                        s_crud_operation_name//s_crud_operation_name
+                                    )
+                                    if(o_data.o_api_response.b_success){
+                                        let n_idx = o_data.a_o_model_instance.indexOf(o_model_instance_existing);
+                                        if(n_idx != -1){
+                                            o_data.a_o_model_instance.splice(n_idx, 1);
+                                        }
+                                    }
+                                    this.setAttribute('aria-busy', false);
+                                    o_js_a_o_model_instance._f_render();
+                                    o_js_o_api_response._f_render();
+                                }
+                            }
+                        ], 
                     }
 
                 })

@@ -1,4 +1,5 @@
-import {f_o_html_from_o_js} from "https://deno.land/x/f_o_html_from_o_js@0.5/mod.js"
+import {f_o_html_from_o_js} from "https://deno.land/x/f_o_html_from_o_js@0.6/mod.js"
+// import {f_o_html_from_o_js} from "./f_o_html_from_o_js.module.js"
 
 
 import {
@@ -11,9 +12,11 @@ import {
     a_o_model
 } from "./model_classes/a_o_model.module.js"
 
-window.f_o_api_response__create = async function(
+window.f_o_api_response = async function(
     o_data,
-    s_o_model_s_name
+    a_search_conditions_multidimensional_for_read_or_update_or_delete,
+    s_o_model_s_name, 
+    s_crud_operation_name
 ){
     // console.log(s_o_model_s_name)
     var o_api_response = await fetch(
@@ -34,8 +37,8 @@ window.f_o_api_response__create = async function(
                     [
                         new O_crud_operation_request(
                             o_data,// no data because read
-                            [],
-                            "create",
+                            a_search_conditions_multidimensional_for_read_or_update_or_delete,
+                            s_crud_operation_name,
                             s_o_model_s_name,
                             1,
                             1,
@@ -117,6 +120,13 @@ window.o_data = {
     o_api_response: false,
 }
 
+// o_data.a_o_model_instance = new Proxy(o_data.a_o_model_instance, {
+//     set: function(obj, prop, value){
+//         console.log("proxy executed")
+//         console.log(obj, prop, value)
+//     }
+// })
+
 o_data.a_o_user = await f_a_o_model_instance__read("O_user", ["n_id", ">", 0]);
 o_data.a_o_chatroom = await f_a_o_model_instance__read("O_chatroom", ["n_id", ">", 0]);
 o_data.a_o_message = await f_a_o_model_instance__read("O_message", ["n_id", ">", 0]);
@@ -186,31 +196,62 @@ input, label, textarea{
     color: #00529B;
     background-color: #BDE5F8;
 }
+div#main {
+    display: flex;
+    flex-direction: row;
+}
+.other{
+    flex-grow:1
+}
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
 `;
 document.head.appendChild(o_style);
 
 var o_div_main = document.createElement("div");
 document.body.appendChild(o_div_main)
 
-
+let f_s_html_highlighted_json = function(s_json){
+    s_json = s_json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return s_json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
 var f_s_html_highlighted = function(
     s_string_to_highlight, 
     s_searchterm
 ){
-    try {
-        var s_html = s_string_to_highlight;
-        if(s_searchterm.trim() != ""){
-            // return s_string_to_highlight
-            s_html = s_html.replaceAll(
-                s_searchterm, 
-                `<span class='highlight'>${s_searchterm}</span>`
-            )
-        }
-        return `<span>${s_html}</span>`
-        
-    } catch (error) {
-        return s_string_to_highlight
+
+    var s_html = s_string_to_highlight.toString();
+    if(s_searchterm.trim() != ""){
+        // return s_string_to_highlight
+        var s_regex_case_insensitive = new RegExp(`${s_searchterm}`, 'ig');
+        s_html = s_html.replaceAll(
+            s_regex_case_insensitive, 
+            function(s_match, n_idx) {
+                // console.log(s_match, n_idx)
+                return `<span class='highlight'>${s_match}</span>`
+            }
+        )
     }
+    return `<span>${s_html}</span>`
+    
+
 
 }
 window.o_js_a_o_model_instance = {
@@ -221,8 +262,8 @@ window.o_js_a_o_model_instance = {
                 ...o_data.a_o_model_instance
                 .filter(function(o_model_instance){
                     var b = false;
-                    for(var o_model_property of o_data.o_model.a_o_model_property){
-                        var value = o_model_instance[o_model_property.s_name];
+                    for(var s_prop_name in o_model_instance){
+                        var value = o_model_instance[s_prop_name];
 
                         if(s_searchterm.trim() == ""){
                             return true;
@@ -238,45 +279,79 @@ window.o_js_a_o_model_instance = {
                     return false;
                 })
                 .map(function(o_model_instance){
+
+                    // console.log(o_model_instance)
                     return {
-                        f_o_js: function(){
-                            // console.log(o_model_instance)
-                            return {
-                                class: "o_model_instance",
-                                a_o:[
-                                    ...o_data.o_model.a_o_model_property
-                                    .map(function(
-                                        o_model_property
-                                    ){
-                                        var value = o_model_instance[o_model_property.s_name];
-                                        // console.log(o_model_property)
-                                        return {
-                                                class: "group",
-                                                a_o:[
-                                                    {
-                                                        class: "innerText",
-                                                        s_tag: "label", 
-                                                        innerText: o_model_property.s_name
-                                                    },
-                                                    {
-                                                        class: "o_model_property",
-                                                        // s_tag: 'input', 
-                                                        // readOnly: true,
-                                                        innerHTML: f_s_html_highlighted(value, s_searchterm),
-                                                        // innerHTML: f_s_html_highlighted(o.s_string1, s_searchterm)
-                                                    },
-                                                ]
-                                        }
-                                        
-                                    }),
-
-                                ]
+                        class: "o_model_instance",
+                        onclick: function(){
+                            console.log(o_model_instance)
+                            for(let s_prop_name in o_data.o_model_instance__new){
+                                o_data.o_model_instance__new[s_prop_name] = o_model_instance[s_prop_name]
                             }
-                        }
+                            // Object.assign(o_data.o_model_instance__new, o_model_instance);
+                            o_js_a_o_model_instance__new._f_render();
+                        },
+                        a_o:[
+                            ...Object.keys(o_model_instance)
+                            .map(function(
+                                s_prop_name
+                            ){
+                                var o_model_property = o_data.o_model.a_o_model_property.filter(o=>o.s_name == s_prop_name);
+                                var value = o_model_instance[s_prop_name];
+                                console.log(s_searchterm)
+                                // this property was added by a 'f_crud_operation_callback__after_f_a_o_crud_in_db' callback 
+                                // console.log(o_model_property)
+                                // console.log(o_model_property)
+                                return {
 
+                                        class: "grid",
+                                        a_o:[
+                                            {
+                                                class: "innerText",
+                                                s_tag: "label", 
+                                                innerText: s_prop_name
+                                            },
+                                            {
+                                                class: `${(o_model_property) ? 'o_model_property' : ''}`,
+                                                // s_tag: 'input', 
+                                                // readOnly: true,
+                                                innerHTML: f_s_html_highlighted(value, s_searchterm),
+                                                // innerHTML: f_s_html_highlighted(o.s_string1, s_searchterm)
+                                            },
+                                        ]
+                                }
+
+
+                                
+                            }),
+
+                        ]
                     }
+
                 })
             ]
+        }
+    }
+}
+var o_js_search_for_a_o_model_instance = {
+    f_o_js: function(){
+        return {
+
+            // <input type="search" id="search" name="search" placeholder="Search">
+            s_tag: 'input',
+            id:'search', 
+            type:'search',
+            name:'search', 
+            placeholder:`search ${o_data.a_o_model_instance.length} entries`,
+            // class:'s_searchterm',
+            value: s_searchterm,
+            oninput: function(o_js){
+                s_searchterm = this.value;
+                o_js_a_o_model_instance._f_render()
+                // o_data.o_model_instance__new = new o_data.o_model();
+                // o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
+                // o_js_a_o_model_instance__new._f_render();
+            }
         }
     }
 }
@@ -284,8 +359,17 @@ var o_js_o_api_response = {
     f_o_js: function(){
         console.log("o_js_o_api_response render !")
         return {
+            // s_tag: 'input',
+            s_tag:'textarea', 
+            oninput: function(){
+
+                this.style.height = "";
+                this.style.height = this.scrollHeight + "px";
+
+            },
+            readOnly: "true",
+            'aria-invalid':`${o_data.o_api_response.b_success ? 'false' : 'true'}`,
             // b_render: this.o_api_response,
-            class: `o_data.o_api_response.s_message ${o_data.o_api_response.b_success ? 'success' : 'error'}`, 
             innerText: `${o_data.o_api_response.b_success ? 'success:' : 'error:'}: ${o_data.o_api_response?.s_message}`
         }
     }
@@ -296,7 +380,7 @@ window.o_js_a_o_model_instance__new = {
     a_o:[
         {
             s_tag: "label",
-            innerText: "create a new instance"
+            innerText: "create a new or update an existing instance"
         },
         {
             f_o_js: function(o_js){
@@ -307,6 +391,7 @@ window.o_js_a_o_model_instance__new = {
                 }
                 return {
                     class: "o_model_instance",
+
                     a_o:[
                         ...o_data.o_model.a_o_model_property
                         .map(function(
@@ -368,10 +453,14 @@ window.o_js_a_o_model_instance__new = {
                                                                             return 'not_selected'
                                                                         })(),
                                                                         value: o_model_instance__foreign.n_id,
-                                                                        innerHTML: f_s_html_highlighted(
-                                                                            JSON.stringify(o_model_instance__foreign),
+                                                                        s_tag: 'pre',
+                                                                        innerHTML:
+                                                                        f_s_html_highlighted(
+                                                                            f_s_html_highlighted_json(
+                                                                                JSON.stringify(o_model_instance__foreign, null, 4)
+                                                                            ), 
                                                                             s_searchterm
-                                                                        ), 
+                                                                        ),
                                                                         onclick: function(){
                                                                             console.log(o_model_instance__foreign)
                                                                             o_model_instance__foreign_selected = o_model_instance__foreign;
@@ -397,6 +486,7 @@ window.o_js_a_o_model_instance__new = {
                                                                     onkeyup: f_oninput_onchange 
                                                                 },
                                                                 {
+                                                                    type:'search',
                                                                     s_tag: 'input', 
                                                                     value: s_searchterm,
                                                                     onkeyup: function(){
@@ -437,24 +527,82 @@ window.o_js_a_o_model_instance__new = {
             }
         }, 
         {
-            s_tag: 'button', 
-            innerText: "create",
-            onclick: async function(o_js){
-                o_data.o_api_response = await f_o_api_response__create(
-                    o_data.o_model_instance__new, 
-                    o_data.o_model.s_name
-                )
-                if(o_data.o_api_response.b_success){
-                    o_data.a_o_model_instance.push(o_data.o_api_response.a_o_crud_operation_result[0].a_o_instance_from_db[0]);
-                    o_data.o_model_instance__new = new o_data.o_model_class();
-                    o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
-                    o_js_a_o_model_instance__new._f_render();
+            class: "grid",
+            a_o: [
+                {
+                    s_tag: 'button', 
+                    'aria-busy':"false",
+                    innerText: "create or update",
+                    onclick: async function(o_js){
+                        this.setAttribute('aria-busy', true);
+                        let s_crud_operation_name = 'create';
+                        let a_search_conditions_multidimensional_for_read_or_update_or_delete = [];
+                        var o_model_instance_existing = o_data.a_o_model_instance.filter(
+                            o=> o.n_id == o_data.o_model_instance__new.n_id
+                        )[0];
+                        if(o_model_instance_existing){
+                            s_crud_operation_name = 'update';
+                            a_search_conditions_multidimensional_for_read_or_update_or_delete = [
+                                'n_id',  '=', o_data.o_model_instance__new.n_id
+                            ];
+                        }
+                        o_data.o_api_response = await f_o_api_response(
+                            o_data.o_model_instance__new,//o_data,
+                            a_search_conditions_multidimensional_for_read_or_update_or_delete,//a_search_conditions_multidimensional_for_read_or_update_or_delete,
+                            o_data.o_model.s_name,//s_o_model_s_name, 
+                            s_crud_operation_name//s_crud_operation_name
+                        )
+                        if(o_data.o_api_response.b_success){
+                            if(s_crud_operation_name == 'create'){
+        
+                                o_data.a_o_model_instance.push(o_data.o_api_response.a_o_crud_operation_result[0].a_o_instance_from_db[0]);
+                                o_data.o_model_instance__new = new o_data.o_model_class();
+                                o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
+                                o_js_a_o_model_instance__new._f_render();
+                            }
+                            if(s_crud_operation_name == 'update'){
+                                Object.assign(o_model_instance_existing, o_data.o_api_response.a_o_crud_operation_result[0].a_o_instance_from_db[0])
+                            }
+                        }
+                        this.setAttribute('aria-busy', false);
+                        console.log("f_render call")
+                        o_js_a_o_model_instance._f_render();
+                        o_js_o_api_response._f_render();
+                    }
+                },
+                {
+                    s_tag: 'button', 
+                    'aria-busy':"false",
+                    innerText: "delete (by n_id)",
+                    onclick : async function(){
+                        this.setAttribute('aria-busy', true);
+                        let s_crud_operation_name = 'delete';
+                        var o_model_instance_existing = o_data.a_o_model_instance.filter(
+                            o=> o.n_id == o_data.o_model_instance__new.n_id
+                        )[0];
+                        let a_search_conditions_multidimensional_for_read_or_update_or_delete = [
+                            'n_id',  '=', o_data.o_model_instance__new.n_id,
+                        ];
+
+                        o_data.o_api_response = await f_o_api_response(
+                            o_data.o_model_instance__new,//o_data,
+                            a_search_conditions_multidimensional_for_read_or_update_or_delete,//a_search_conditions_multidimensional_for_read_or_update_or_delete,
+                            o_data.o_model.s_name,//s_o_model_s_name, 
+                            s_crud_operation_name//s_crud_operation_name
+                        )
+                        if(o_data.o_api_response.b_success){
+                            let n_idx = o_data.a_o_model_instance.indexOf(o_model_instance_existing);
+                            if(n_idx != -1){
+                                o_data.a_o_model_instance.splice(n_idx, 1);
+                            }
+                        }
+                        this.setAttribute('aria-busy', false);
+                        o_js_a_o_model_instance._f_render();
+                        o_js_o_api_response._f_render();
+                    }
                 }
-                console.log("f_render call")
-                o_js_a_o_model_instance._f_render();
-                o_js_o_api_response._f_render();
-            }
-        },
+            ]
+        }
 
     ],
 }
@@ -465,57 +613,79 @@ var n_len = 1;
 var o = {
     id: "main",
     a_o: [
+        // {
+        //     s_tag: "link", 
+        //     rel:"stylesheet",
+        //     href:"https://unpkg.com/@picocss/pico@1.5.7/css/pico.min.css",
+        // },
+        
         {
             class: "a_o_model",
             a_o:[
+                {
+                    s_tag: 'h2',
+                    innerText: 'Model:'
+                },
                 ...o_data.a_o_model.map(
                     function(o){
                         return {
-                            s_tag: 'button',
-                            innerText: o.s_name,
-                            s_o_model_s_name: o.s_name, 
-                            onclick: function(){
-                                var s_o_model_s_name = this.getAttribute("s_o_model_s_name");
-                                o_data.o_model = o_data.a_o_model.filter(
-                                    function(o){
-                                        return o.s_name == s_o_model_s_name
+                        //     <label for="small">
+                        //     <input type="radio" id="small" name="size" value="small" checked>
+                        //     Small
+                        //   </label>
+                            
+                            s_tag: 'label',
+                            for: `o_model.${o.s_name}`,
+                            a_o: [
+                                {
+                                    s_tag: "input", 
+                                    type:'radio', 
+                                    name: 'o_model',
+                                    id: `o_model.${o.s_name}`, 
+                                    value:  o.s_name, 
+                                    onclick: function(){
+                                        o_data.o_model = o_data.a_o_model.filter(
+                                            function(obj){
+                                                return obj.s_name == o.s_name
+                                            }
+                                        )[0];
+                                        // console.log(o_model)
+                                        o_data.a_o_model_instance = o_data[`a_${o.s_name.toLowerCase()}`];
+                                        o_js_search_for_a_o_model_instance._f_render();
+                                        // console.log(o_data.a_o_model_instance)
+                                        // console.log(this)
+                                        o_js_a_o_model_instance._f_render();
+                                        o_data.o_model_class = o_s_class_name_o_class[o.s_name]
+                                        o_data.o_model_instance__new = new o_data.o_model_class();
+                                        o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
+                                        o_js_a_o_model_instance__new._f_render();
+                                        console.log("test")
                                     }
-                                )[0];
-                                // console.log(o_model)
-                                o_data.a_o_model_instance = o_data[`a_${s_o_model_s_name.toLowerCase()}`];
-                                // console.log(o_data.a_o_model_instance)
-                                // console.log(this)
-                                o_js_a_o_model_instance._f_render();
-                                o_data.o_model_class = o_s_class_name_o_class[s_o_model_s_name]
-                                o_data.o_model_instance__new = new o_data.o_model_class();
-                                o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
-                                o_js_a_o_model_instance__new._f_render();
-                                console.log("test")
-                            }
+                                }, 
+                                {
+                                    s_tag: 'span',
+                                    innerText:  o.s_name, 
+                                }
+                            ]
                         }
                     }
                 )
             ]
         },
-        o_js_o_api_response,
-        o_js_a_o_model_instance__new, 
         {
-            s_tag: "label",
-            innerText: "s_searchterm"
-        },
-        {
-            s_tag: "input", 
-            type: 'text',
-            value: s_searchterm,
-            oninput: function(o_js){
-                s_searchterm = this.value;
-                o_js_a_o_model_instance._f_render()
-                o_data.o_model_instance__new = new o_s_class_name_o_class[s_o_model_s_name]();
-                o_data.o_model_instance__new.n_id = o_data.a_o_model_instance.map(o=>o.n_id).sort((n1,n2)=>n2-n1)[0]+1;
-                o_js_a_o_model_instance__new._f_render();
-            }
-        },
-        o_js_a_o_model_instance,
+            class: "other", 
+            a_o:[
+                o_js_o_api_response,
+                o_js_a_o_model_instance__new, 
+                // {
+                //     s_tag: "label",
+                //     innerText: "s_searchterm"
+                // },
+
+                o_js_search_for_a_o_model_instance,
+                o_js_a_o_model_instance,
+            ]
+        }
     ]
 }
 
